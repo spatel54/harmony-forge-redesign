@@ -171,31 +171,34 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
             style={{ fill: "var(--hf-detail)" }}
           />
 
-          {/* ── Highlight overlays (drawn before notes so notes are on top) ── */}
+          {/* Highlight overlays (drawn before notes so notes are on top) ── */}
+          {showViolations && (
+            <>
+              {/* BlueNoteHL: x:116 y:36 w:20 h:230 fill:#1976D21A stroke:#1976D2 r:2 */}
+              <rect
+                x={116}
+                y={36}
+                width={20}
+                height={230}
+                rx={2}
+                fill="#1976D21A"
+                stroke="#1976D2"
+                strokeWidth={1}
+              />
 
-          {/* BlueNoteHL: x:116 y:36 w:20 h:230 fill:#1976D21A stroke:#1976D2 r:2 */}
-          <rect
-            x={116}
-            y={36}
-            width={20}
-            height={230}
-            rx={2}
-            fill="#1976D21A"
-            stroke="#1976D2"
-            strokeWidth={1}
-          />
-
-          {/* OrangeNoteHL: x:196 y:36 w:20 h:230 fill:#FFB3001A stroke:#FFB300 r:2 */}
-          <rect
-            x={196}
-            y={36}
-            width={20}
-            height={230}
-            rx={2}
-            fill="#FFB3001A"
-            stroke="#FFB300"
-            strokeWidth={1}
-          />
+              {/* OrangeNoteHL: x:196 y:36 w:20 h:230 fill:#FFB3001A stroke:#FFB300 r:2 */}
+              <rect
+                x={196}
+                y={36}
+                width={20}
+                height={230}
+                rx={2}
+                fill="#FFB3001A"
+                stroke="#FFB300"
+                strokeWidth={1}
+              />
+            </>
+          )}
 
           {/* ViolationOverlay: x:188 y:36 w:56 h:230 fill:violation/10 stroke:violation */}
           {showViolations && (
@@ -249,33 +252,37 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
         {/* ── Badges (HTML overlays for easier pointer-events) ──
             All 24×24 with r:12 (full circle)                    */}
 
-        {/* BlueBadge: x:114 y:24 fill:#1976D2 */}
-        <div
-          className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
-          style={{ left: 114, top: 24, backgroundColor: "#1976D2" }}
-          aria-label="Blue note group"
-          role="img"
-        >
-          <Music
-            className="w-[12px] h-[12px] text-white"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </div>
+        {showViolations && (
+          <>
+            {/* BlueBadge: x:114 y:24 fill:#1976D2 */}
+            <div
+              className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
+              style={{ left: 114, top: 24, backgroundColor: "#1976D2" }}
+              aria-label="Blue note group"
+              role="img"
+            >
+              <Music
+                className="w-[12px] h-[12px] text-white"
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </div>
 
-        {/* AmberBadge: x:190 y:24 fill:#FFB300 */}
-        <div
-          className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
-          style={{ left: 190, top: 24, backgroundColor: "#FFB300" }}
-          aria-label="Amber note group"
-          role="img"
-        >
-          <Music
-            className="w-[12px] h-[12px] text-white"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </div>
+            {/* AmberBadge: x:190 y:24 fill:#FFB300 */}
+            <div
+              className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
+              style={{ left: 190, top: 24, backgroundColor: "#FFB300" }}
+              aria-label="Amber note group"
+              role="img"
+            >
+              <Music
+                className="w-[12px] h-[12px] text-white"
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </div>
+          </>
+        )}
 
         {/* ViolBadge: x:220 y:24 fill:$semantic-violation */}
         {showViolations && (

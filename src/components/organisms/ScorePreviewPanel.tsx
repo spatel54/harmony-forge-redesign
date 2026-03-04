@@ -2,8 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { PlaybackBar } from "@/components/molecules/PlaybackBar";
 
-export interface ScorePreviewPanelProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ScorePreviewPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   scoreTitle?: string;
   scoreMeta?: string;
   onReupload?: () => void;
@@ -73,7 +72,8 @@ export const ScorePreviewPanel = React.forwardRef<
               className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px] border"
               style={{
                 color: "var(--hf-text-primary)",
-                backgroundColor: "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
+                backgroundColor:
+                  "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
                 borderColor: "var(--hf-detail)",
               }}
             >
@@ -86,20 +86,23 @@ export const ScorePreviewPanel = React.forwardRef<
               className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px] border"
               style={{
                 color: "var(--hf-text-primary)",
-                backgroundColor: "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
+                backgroundColor:
+                  "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
                 borderColor: "var(--hf-detail)",
               }}
             >
               4/4
             </span>
 
-            {/* TagTrad — filled amber */}
+            {/* TagTrad */}
             <span
               role="listitem"
-              className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px]"
+              className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px] border"
               style={{
-                color: "var(--text-on-light)",
-                backgroundColor: "var(--hf-accent)",
+                color: "var(--hf-text-primary)",
+                backgroundColor:
+                  "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
+                borderColor: "var(--hf-detail)",
               }}
             >
               Traditional

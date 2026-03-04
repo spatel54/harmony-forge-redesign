@@ -45,15 +45,14 @@ export const EnsemblePreviewCard = React.forwardRef<
             >
               Ensemble Preview
             </span>
-            {/* "Traditional" style tag — same chip treatment as part chips */}
+            {/* "Traditional" style tag — unified treatment */}
             <span
-              className="inline-flex items-center rounded-full font-mono text-[10px] font-normal leading-none px-[10px] py-[4px]"
+              className="inline-flex items-center rounded-full font-mono text-[10px] font-normal leading-none px-[10px] py-[4px] border"
               style={{
-                color: "var(--hf-surface)",
+                color: "var(--hf-text-primary)",
                 backgroundColor:
-                  "color-mix(in srgb, var(--hf-surface) 15%, transparent)",
-                border:
-                  "1px solid color-mix(in srgb, var(--hf-surface) 30%, transparent)",
+                  "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
+                borderColor: "var(--hf-detail)",
               }}
             >
               Traditional
