@@ -216,8 +216,24 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
           )}
 
           {/* ── Stems ─────────────────────────────────────── */}
-          <rect x={131} y={22} width={1} height={28} fill="#1976D2" />
-          <rect x={211} y={26} width={1} height={28} fill="#FFB300" />
+          <rect
+            x={131}
+            y={22}
+            width={1}
+            height={28}
+            style={{
+              fill: showViolations ? "#1976D2" : "var(--hf-text-primary)",
+            }}
+          />
+          <rect
+            x={211}
+            y={26}
+            width={1}
+            height={28}
+            style={{
+              fill: showViolations ? "#FFB300" : "var(--hf-text-primary)",
+            }}
+          />
           <rect
             x={291}
             y={18}
@@ -228,12 +244,30 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
 
           {/* ── Blue notes ────────────────────────────────── */}
           {blueNotes.map(([x, y], i) => (
-            <ellipse key={i} cx={x} cy={y} rx={6} ry={4.5} fill="#1976D2" />
+            <ellipse
+              key={i}
+              cx={x}
+              cy={y}
+              rx={6}
+              ry={4.5}
+              style={{
+                fill: showViolations ? "#1976D2" : "var(--hf-text-primary)",
+              }}
+            />
           ))}
 
           {/* ── Amber notes ───────────────────────────────── */}
           {amberNotes.map(([x, y], i) => (
-            <ellipse key={i} cx={x} cy={y} rx={6} ry={4.5} fill="#FFB300" />
+            <ellipse
+              key={i}
+              cx={x}
+              cy={y}
+              rx={6}
+              ry={4.5}
+              style={{
+                fill: showViolations ? "#FFB300" : "var(--hf-text-primary)",
+              }}
+            />
           ))}
 
           {/* ── Default notes ─────────────────────────────── */}
