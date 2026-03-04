@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 export interface ScoreCanvasProps extends React.HTMLAttributes<HTMLDivElement> {
   staveLabels?: [string, string, string, string];
+  showViolations?: boolean;
 }
 
 /**
@@ -46,7 +47,15 @@ export interface ScoreCanvasProps extends React.HTMLAttributes<HTMLDivElement> {
  *     AmberBadge: x:190 y:24  fill:#FFB300              icon:music 12×12 white
  */
 export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
-  ({ staveLabels = ["S", "A", "T", "B"], className, ...props }, ref) => {
+  (
+    {
+      staveLabels = ["S", "A", "T", "B"],
+      showViolations = false,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     // Stave definitions matching Pencil absolute coords
     const staves = [
       { y: 40, lines: 5, label: staveLabels[0], labelY: 50 },
@@ -189,17 +198,19 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
           />
 
           {/* ViolationOverlay: x:188 y:36 w:56 h:230 fill:violation/10 stroke:violation */}
-          <rect
-            x={188}
-            y={36}
-            width={56}
-            height={230}
-            style={{
-              fill: "var(--semantic-violation-10)",
-              stroke: "var(--semantic-violation)",
-            }}
-            strokeWidth={1}
-          />
+          {showViolations && (
+            <rect
+              x={188}
+              y={36}
+              width={56}
+              height={230}
+              style={{
+                fill: "var(--semantic-violation-10)",
+                stroke: "var(--semantic-violation)",
+              }}
+              strokeWidth={1}
+            />
+          )}
 
           {/* ── Stems ─────────────────────────────────────── */}
           <rect x={131} y={22} width={1} height={28} fill="#1976D2" />
@@ -267,22 +278,24 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
         </div>
 
         {/* ViolBadge: x:220 y:24 fill:$semantic-violation */}
-        <div
-          className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
-          style={{
-            left: 220,
-            top: 24,
-            backgroundColor: "var(--semantic-violation)",
-          }}
-          aria-label="Voice-leading violation"
-          role="img"
-        >
-          <TriangleAlert
-            className="w-[12px] h-[12px] text-white"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </div>
+        {showViolations && (
+          <div
+            className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
+            style={{
+              left: 220,
+              top: 24,
+              backgroundColor: "var(--semantic-violation)",
+            }}
+            aria-label="Voice-leading violation"
+            role="img"
+          >
+            <TriangleAlert
+              className="w-[12px] h-[12px] text-white"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </div>
+        )}
 
         {/* VexFlow live render target */}
         <div

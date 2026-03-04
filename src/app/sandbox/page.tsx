@@ -175,6 +175,7 @@ export default function TactileSandboxPage() {
           <div className="relative flex-1 min-h-0">
             <ScoreCanvas
               className="w-full h-full"
+              showViolations={isInspectorOpen}
               style={{
                 transform: `scale(${zoom / 100})`,
                 transformOrigin: "top left",
