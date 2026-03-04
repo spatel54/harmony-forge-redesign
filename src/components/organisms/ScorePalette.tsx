@@ -365,7 +365,6 @@ export const ScorePalette = React.forwardRef<HTMLDivElement, ScorePaletteProps>(
               </div>
             )}
           </div>
-          </div>
         </div>
 
         {/* Filtered Tools Rendering ── Rows of 3 categories each ── */}
