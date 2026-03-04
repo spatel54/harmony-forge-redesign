@@ -50,7 +50,7 @@ export default function TactileSandboxPage() {
   const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
 
   // Theory inspector open/close
-  const [isInspectorOpen, setIsInspectorOpen] = React.useState(true);
+  const [isInspectorOpen, setIsInspectorOpen] = React.useState(false);
 
   // Inspector resizable width
   const [inspectorWidth, setInspectorWidth] = React.useState(380);
@@ -108,20 +108,7 @@ export default function TactileSandboxPage() {
       timestamp?: string;
     }>
   >([
-    { id: "div1", type: "divider", content: "Today" },
-    {
-      id: "sys1",
-      type: "system",
-      content: "Analyzing Measure 3… Violation detected.",
-      timestamp: "09:42 AM",
-    },
-    {
-      id: "v1",
-      type: "violation",
-      content:
-        "Per Schenkerian analysis (Schenker, Free Composition §100), parallel fifths between Soprano and Alto at beats 2–3 violate strict voice-leading. The outer-voice framework demands contrary motion at cadential points.",
-      timestamp: "09:42 AM",
-    },
+    { id: "sys-init", type: "system", content: "HarmonyForge Analysis ready." },
   ]);
 
   const handleSend = React.useCallback(() => {
