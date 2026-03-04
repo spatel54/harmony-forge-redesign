@@ -76,99 +76,120 @@ export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
 
     return (
       <>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".pdf,.xml,.mxl,.midi,.mid"
-        className="sr-only"
-        aria-hidden="true"
-        tabIndex={-1}
-        onChange={handleInputChange}
-      />
-      <div
-        ref={ref}
-        className={cn("relative aspect-1513/880 mx-auto shrink-0 cursor-pointer", className)}
-        onClick={handleClick}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        role="button"
-        tabIndex={0}
-        aria-label="Upload score — click or drag a PDF, XML, or MIDI file"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
-        {...props}
-      >
-        {/* Unified SVG Map */}
-        <svg
-          className="absolute inset-0 w-full h-full drop-shadow-sm pointer-events-none"
-          viewBox="0 0 1513 880"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMax meet"
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,.xml,.mxl,.midi,.mid"
+          className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
+          onChange={handleInputChange}
+        />
+        <div
+          ref={ref}
+          className={cn(
+            "relative aspect-1513/880 mx-auto shrink-0 cursor-pointer",
+            className,
+          )}
+          onClick={handleClick}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload score — click or drag a PDF, XML, or MIDI file"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleClick();
+            }
+          }}
+          {...props}
         >
-          <defs>
-            <linearGradient
-              id="ktaiB_grad"
-              x1="719.5"
-              y1="0"
-              x2="719.5"
-              y2="648"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor={gradStart} />
-              <stop offset="1" stopColor={gradEnd} />
-            </linearGradient>
-          </defs>
+          {/* ─── Unified SVG ─── viewBox maps exactly to design proportions ─── */}
+          <svg
+            className="absolute inset-0 w-full h-full drop-shadow-sm pointer-events-none"
+            viewBox="0 0 1513 1010"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMax meet"
+          >
+            <defs>
+              {/* Gradient for the canvas panel (ktaiB / Rectangle 1) */}
+              <linearGradient
+                id="ktaiB_grad"
+                x1="719.5"
+                y1="0"
+                x2="719.5"
+                y2="648"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor={gradStart} />
+                <stop offset="1" stopColor={gradEnd} />
+              </linearGradient>
+            </defs>
 
-          {/* Node 1ZRgJ: Stem — behind the tray */}
-          <rect x="715.5" y="700" width="82" height="180" fill={stemColor} />
+            {/* ── 1. Wooden post / stem (1ZRgJ) — behind everything ───────────── */}
+            {/* Design: x:715.5 y:69 (in n4ubU), w:82 h:288. n4ubU starts at y:648. */}
+            {/* SVG y = 648 + 69 = 717. Visible to bottom of viewBox (1010 - 717 = 293px) */}
+            <rect x="715.5" y="717" width="82" height="293" fill={stemColor} />
 
-          {/* Node n4ubU: The 1513×70 wooden tray base */}
-          <rect
-            x="0"
-            y="648"
-            width="1513"
-            height="70"
-            rx="20"
-            fill={baseColor}
-          />
+            {/* ── 2. Canvas panel (ktaiB / Frame 22) — main music stand body ─── */}
+            {/* Node ktaiB: Canvas trapezoid (1439px wide, 37px offset inside 1513px) */}
+            <g transform="translate(37, 0)">
+              {/* Backing plate trapezoid */}
+              <path
+                d="M122 0l1195 0c12 0 24.2 7 25.1 19.8l96.9 628.2-1439 0 98.9-628.2c0.9-12.8 11.1-19.8 23.1-19.8z"
+                fill="url(#ktaiB_grad)"
+              />
 
-          {/* Node ktaiB: Canvas trapezoid (1439px wide, 37px offset inside 1513px) */}
-          <g transform="translate(37, 0)">
-            {/* Backing plate trapezoid */}
-            <path
-              d="M122 0l1195 0c12 0 24.2 7 25.1 19.8l96.9 628.2-1439 0 98.9-628.2c0.9-12.8 11.1-19.8 23.1-19.8z"
-              fill="url(#ktaiB_grad)"
-            />
+              {/* ── 3. Dashed drop-zone rect (SQz0K) ─────────────────────────── */}
+              {/* Design: x:482.5 y:41 w:474 h:566 */}
+              <rect
+                x="482.5"
+                y="41"
+                width="474"
+                height="566"
+                rx="20"
+                stroke={strokeColor}
+                strokeOpacity={isHovered ? "1" : "0.5"}
+                strokeWidth="2"
+                strokeDasharray="10 5"
+                className="transition-colors duration-300"
+              />
 
-            {/* Dashed drop zone rectangle */}
+              {/* ── 4. Upload prompt (zuzV6) ─────────────────────────────────── */}
+              {/* Design: Frame 4 at x:560 y:214, we position the foreignObject exactly over the drop-zone rect */}
+              <foreignObject x="482.5" y="41" width="474" height="566">
+                <div className="w-full h-full flex flex-col items-center justify-center pointer-events-auto gap-4 px-8">
+                  <UploadPromptContent isDark={isDark} />
+                </div>
+              </foreignObject>
+            </g>
+
+            {/* ── 5. Shelf base (fqxzb) ────────────────────────────────────── */}
+            {/* Design: fill:#dec7a7, h:70, w:1513, cornerRadius:20 (all corners) */}
             <rect
-              x="482.5"
-              y="41"
-              width="474"
-              height="566"
+              x="0"
+              y="648"
+              width="1513"
+              height="70"
               rx="20"
-              stroke={strokeColor}
-              strokeOpacity={isHovered ? "1" : "0.5"}
-              strokeWidth="2"
-              strokeDasharray="10 5"
-              className="transition-colors duration-300"
+              fill={baseColor}
             />
 
-            {/* Upload Prompt HTML embedded in SVG */}
-            <foreignObject x="482.5" y="41" width="474" height="566">
-              <div className="w-full h-full flex flex-col items-center justify-center pointer-events-auto gap-4 px-8">
-                <UploadPromptContent isDark={isDark} />
-              </div>
-            </foreignObject>
-          </g>
-        </svg>
-      </div>
+            {/* ── 6. Dark centre stripe (79ha5, clipped by fqxzb) ─────────── */}
+            {/* Design: fill:#1f1f1f, w:48, h:390 at x:755 y:70 in fqxzb.      */}
+            {/* fqxzb clip:true → only h:70 is visible (y:648 to y:718).        */}
+            <rect
+              x="755"
+              y="648"
+              width="48"
+              height="70"
+              fill={isDark ? "#3a1f1c" : "#1f1f1f"}
+            />
+          </svg>
+        </div>
       </>
     );
   },
