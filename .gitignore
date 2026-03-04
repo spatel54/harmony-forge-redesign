@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ruflo / claude-flow
+.claude/memory.db
+
+# Third-party reference repos (read-only, not part of HarmonyForge history)
+references/taste-skill/
