@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Search,
@@ -70,6 +72,9 @@ const SmuflSlur = createSmufl("articulation-slur");
 export interface ScorePaletteProps extends React.HTMLAttributes<HTMLDivElement> {
   onSearchChange?: (value: string) => void;
   searchValue?: string;
+  activeFilter?: string;
+  onFilterChange?: (filter: string) => void;
+  filterOptions?: string[];
 }
 
 /**
@@ -88,7 +93,34 @@ export interface ScorePaletteProps extends React.HTMLAttributes<HTMLDivElement> 
  *   Icons inside btns: 20×20
  */
 export const ScorePalette = React.forwardRef<HTMLDivElement, ScorePaletteProps>(
-  ({ onSearchChange, searchValue = "", className, ...props }, ref) => {
+  (
+    {
+      onSearchChange,
+      searchValue = "",
+      activeFilter = "All Tools",
+      onFilterChange,
+      filterOptions = ["All Tools"],
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const [filterOpen, setFilterOpen] = React.useState(false);
+    const filterRef = React.useRef<HTMLDivElement>(null);
+
+    // Close dropdown on outside click
+    React.useEffect(() => {
+      const handler = (e: MouseEvent) => {
+        if (
+          filterRef.current &&
+          !filterRef.current.contains(e.target as Node)
+        ) {
+          setFilterOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
+    }, []);
     const ROW = cn(
       "flex items-center w-full h-[48px] px-[32px] gap-[20px]",
       "border-b border-[var(--hf-detail)]",
@@ -130,30 +162,68 @@ export const ScorePalette = React.forwardRef<HTMLDivElement, ScorePaletteProps>(
             />
           </div>
 
-          {/* Dropdown trigger — Node tb8Ro: h:30 r:6 fill:$neutral-50 stroke:$sonata-detail gap:6 */}
-          <button
-            type="button"
-            className="flex items-center gap-[6px] h-[30px] px-[10px] rounded-[6px] shrink-0 transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--hf-accent)"
-            style={{
-              backgroundColor: "var(--hf-canvas-bg)",
-              border: "1px solid var(--hf-detail)",
-            }}
-            aria-label="Filter tool groups"
-            aria-haspopup="listbox"
-          >
-            <span
-              className="font-body text-[12px] font-normal"
-              style={{ color: "var(--hf-text-primary)" }}
+          {/* Dropdown trigger — functional */}
+          <div ref={filterRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setFilterOpen((v) => !v)}
+              className="flex items-center gap-[6px] h-[30px] px-[10px] rounded-[6px] transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--hf-accent)"
+              style={{
+                backgroundColor: "var(--hf-canvas-bg)",
+                border: "1px solid var(--hf-detail)",
+              }}
+              aria-label="Filter tool groups"
+              aria-haspopup="listbox"
+              aria-expanded={filterOpen}
             >
-              All Tools
-            </span>
-            <ChevronDown
-              className="w-[14px] h-[14px]"
-              strokeWidth={1.75}
-              style={{ color: "var(--hf-surface)" }}
-              aria-hidden="true"
-            />
-          </button>
+              <span
+                className="font-body text-[12px] font-normal"
+                style={{ color: "var(--hf-text-primary)" }}
+              >
+                {activeFilter}
+              </span>
+              <ChevronDown
+                className={`w-[14px] h-[14px] transition-transform duration-150 ${filterOpen ? "rotate-180" : ""}`}
+                strokeWidth={1.75}
+                style={{ color: "var(--hf-surface)" }}
+                aria-hidden="true"
+              />
+            </button>
+
+            {/* Filter dropdown list */}
+            {filterOpen && (
+              <div
+                role="listbox"
+                aria-label="Filter tools"
+                className="absolute right-0 top-[36px] z-50 min-w-[140px] rounded-[6px] border border-[var(--hf-detail)] shadow-md overflow-hidden"
+                style={{ backgroundColor: "var(--hf-bg)" }}
+              >
+                {filterOptions.map((opt) => (
+                  <div
+                    key={opt}
+                    role="option"
+                    aria-selected={opt === activeFilter}
+                    onClick={() => {
+                      onFilterChange?.(opt);
+                      setFilterOpen(false);
+                    }}
+                    className="flex items-center gap-[8px] px-[12px] py-[8px] cursor-pointer hover:bg-[var(--hf-surface)]/5 transition-colors"
+                  >
+                    <span
+                      className={`w-[6px] h-[6px] rounded-full shrink-0 ${opt === activeFilter ? "opacity-100" : "opacity-0"}`}
+                      style={{ backgroundColor: "var(--hf-accent)" }}
+                    />
+                    <span
+                      className="font-mono text-[11px]"
+                      style={{ color: "var(--hf-text-primary)" }}
+                    >
+                      {opt}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Row 1: SCORE / EDIT / DURATION ── Node 4mbSg ── */}

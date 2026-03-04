@@ -7,8 +7,7 @@ export interface SelectedPart {
   voice: VoiceType;
 }
 
-export interface EnsemblePreviewCardProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface EnsemblePreviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
   selectedParts: SelectedPart[];
   totalParts?: number;
   onRemovePart?: (label: string) => void;
@@ -22,62 +21,82 @@ export interface EnsemblePreviewCardProps
 export const EnsemblePreviewCard = React.forwardRef<
   HTMLDivElement,
   EnsemblePreviewCardProps
->(({ selectedParts, totalParts = 12, onRemovePart, className, ...props }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "flex flex-col gap-[16px] w-full rounded-[6px] p-[20px]",
-        "border border-[var(--hf-detail)]",
-        className,
-      )}
-      {...props}
-    >
-      {/* Header row — Node 7bP8H */}
-      <div className="flex items-center justify-between w-full">
-        <span
-          className="font-mono text-[12px] font-bold leading-none"
-          style={{ color: "var(--hf-text-primary)" }}
-        >
-          Ensemble Preview
-        </span>
-        <span
-          className="font-mono text-[11px] font-normal leading-none"
-          style={{ color: "var(--hf-text-sub)" }}
-        >
-          {selectedParts.length} / {totalParts} parts
-        </span>
-      </div>
-
-      {/* Chip row — Node 9c48S */}
+>(
+  (
+    { selectedParts, totalParts = 12, onRemovePart, className, ...props },
+    ref,
+  ) => {
+    return (
       <div
-        className="flex flex-wrap gap-[8px]"
-        role="list"
-        aria-label="Selected ensemble parts"
+        ref={ref}
+        className={cn(
+          "flex flex-col gap-[16px] w-full rounded-[6px] p-[20px]",
+          "border border-[var(--hf-detail)]",
+          className,
+        )}
+        {...props}
       >
-        {selectedParts.length === 0 ? (
+        {/* Header row — Node 7bP8H */}
+        <div className="flex items-center justify-between w-full flex-wrap gap-[8px]">
+          <div className="flex items-center gap-[8px]">
+            <span
+              className="font-mono text-[12px] font-bold leading-none"
+              style={{ color: "var(--hf-text-primary)" }}
+            >
+              Ensemble Preview
+            </span>
+            {/* "Traditional" style tag — same chip treatment as part chips */}
+            <span
+              className="inline-flex items-center rounded-full font-mono text-[10px] font-normal leading-none px-[10px] py-[4px]"
+              style={{
+                color: "var(--hf-surface)",
+                backgroundColor:
+                  "color-mix(in srgb, var(--hf-surface) 15%, transparent)",
+                border:
+                  "1px solid color-mix(in srgb, var(--hf-surface) 30%, transparent)",
+              }}
+            >
+              Traditional
+            </span>
+          </div>
           <span
             className="font-mono text-[11px] font-normal leading-none"
             style={{ color: "var(--hf-text-sub)" }}
           >
-            No parts selected
+            {selectedParts.length} / {totalParts} parts
           </span>
-        ) : (
-          selectedParts.map((part) => (
-            <div key={`${part.voice}-${part.label}`} role="listitem">
-              <PartChip
-                label={part.label}
-                voice={part.voice}
-                onRemove={
-                  onRemovePart ? () => onRemovePart(part.label) : undefined
-                }
-              />
-            </div>
-          ))
-        )}
+        </div>
+
+        {/* Chip row — Node 9c48S */}
+        <div
+          className="flex flex-wrap gap-[8px]"
+          role="list"
+          aria-label="Selected ensemble parts"
+        >
+          {selectedParts.length === 0 ? (
+            <span
+              className="font-mono text-[11px] font-normal leading-none"
+              style={{ color: "var(--hf-text-sub)" }}
+            >
+              No parts selected
+            </span>
+          ) : (
+            selectedParts.map((part) => (
+              <div key={`${part.voice}-${part.label}`} role="listitem">
+                <PartChip
+                  label={part.label}
+                  voice={part.voice}
+                  onRemove={
+                    onRemovePart ? () => onRemovePart(part.label) : undefined
+                  }
+                />
+              </div>
+            ))
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 EnsemblePreviewCard.displayName = "EnsemblePreviewCard";

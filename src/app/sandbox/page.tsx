@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ZoomIn, ZoomOut } from "lucide-react";
 import { SandboxHeader } from "@/components/organisms/SandboxHeader";
 import { ScorePalette } from "@/components/organisms/ScorePalette";
 import { ScoreCanvas } from "@/components/organisms/ScoreCanvas";
@@ -9,30 +10,152 @@ import { TheoryInspectorPanel } from "@/components/organisms/TheoryInspectorPane
 import { ExportModal } from "@/components/organisms/ExportModal";
 import { ChatFAB } from "@/components/atoms/ChatFAB";
 
+const TOOL_GROUPS = [
+  "SCORE",
+  "EDIT",
+  "DURATION",
+  "PITCH",
+  "TEXT",
+  "MEASURE",
+  "DYNAMICS",
+  "ARTICULATION",
+];
+
+/** Simulated AI replies for the Theory Inspector chat */
+const AI_REPLIES = [
+  "According to Schenkerian analysis, this progression represents a middleground structural motion from I to V.",
+  "The parallel fifths between Soprano and Alto at beat 3 violate strict voice-leading (Schenker, Free Composition §100).",
+  "This cadential Ⅰ⁶₄ → V pattern is a standard suspension figure found throughout Classical-era counterpoint.",
+  "The bass line descends by step through a filled-in third — a common *Bassbrechung* pattern.",
+];
+
 /**
  * TactileSandboxPage
  * Pencil Nodes: dcf2A (with inspector) / AcJnt / FlAan (full-width, inspector closed).
  *
- * Layout — Inspector open (default):
- *   ┌──────────────────────────────┬──────────────────┐
- *   │  ScorePalette  (fills)        │                  │
- *   ├──────────────────────────────┤  TheoryInspector │
- *   │  ScoreCanvas   (fills)        │  Panel (380px)   │
- *   ├──────────────────────────────┤                  │
- *   │  SandboxPlaybackBar (60px)    │                  │
- *   └──────────────────────────────┴──────────────────┘
- *
- * Layout — Inspector closed (Node AcJnt / FlAan):
- *   ScoreCanvas fills full width; ChatFAB floats bottom-right to reopen.
+ * New in this revision:
+ *  - ScorePalette search + All Tools filter wired with local state
+ *  - Zoom in/out controls (level 50–200%)
+ *  - Theory Inspector panel is resizable by dragging left edge
+ *  - Chat has functional send + simulated AI reply
+ *  - Inspector close/open with ChatFAB
  */
 export default function TactileSandboxPage() {
+  // Playback
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [chatInput, setChatInput] = React.useState("");
+  const totalPages = 4;
+
+  // Export modal
   const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+
+  // Theory inspector open/close
   const [isInspectorOpen, setIsInspectorOpen] = React.useState(true);
 
-  const totalPages = 4;
+  // Inspector resizable width
+  const [inspectorWidth, setInspectorWidth] = React.useState(380);
+  const isResizing = React.useRef(false);
+  const startX = React.useRef(0);
+  const startWidth = React.useRef(380);
+
+  const handleResizeStart = React.useCallback(
+    (e: React.MouseEvent) => {
+      isResizing.current = true;
+      startX.current = e.clientX;
+      startWidth.current = inspectorWidth;
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "col-resize";
+    },
+    [inspectorWidth],
+  );
+
+  React.useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      const delta = startX.current - e.clientX; // dragging left → wider
+      const newW = Math.max(280, Math.min(600, startWidth.current + delta));
+      setInspectorWidth(newW);
+    };
+    const onMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  // Search + filter
+  const [searchValue, setSearchValue] = React.useState("");
+  const [activeFilter, setActiveFilter] = React.useState("All Tools");
+
+  // Zoom
+  const [zoom, setZoom] = React.useState(100);
+  const handleZoomIn = () => setZoom((z) => Math.min(200, z + 25));
+  const handleZoomOut = () => setZoom((z) => Math.max(50, z - 25));
+
+  // Chat state (edit 4)
+  const [chatInput, setChatInput] = React.useState("");
+  const [messages, setMessages] = React.useState<
+    Array<{
+      id: string;
+      type: "system" | "user" | "ai" | "violation" | "divider" | "chips";
+      content?: string;
+      timestamp?: string;
+    }>
+  >([
+    { id: "div1", type: "divider", content: "Today" },
+    {
+      id: "sys1",
+      type: "system",
+      content: "Analyzing Measure 3… Violation detected.",
+      timestamp: "09:42 AM",
+    },
+    {
+      id: "v1",
+      type: "violation",
+      content:
+        "Per Schenkerian analysis (Schenker, Free Composition §100), parallel fifths between Soprano and Alto at beats 2–3 violate strict voice-leading. The outer-voice framework demands contrary motion at cadential points.",
+      timestamp: "09:42 AM",
+    },
+  ]);
+
+  const handleSend = React.useCallback(() => {
+    const text = chatInput.trim();
+    if (!text) return;
+    const now = new Date().toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const userMsg = {
+      id: `u-${Date.now()}`,
+      type: "user" as const,
+      content: text,
+      timestamp: now,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setChatInput("");
+    // Simulate AI reply after 800ms
+    setTimeout(() => {
+      const reply = AI_REPLIES[Math.floor(Math.random() * AI_REPLIES.length)];
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          type: "ai" as const,
+          content: reply,
+          timestamp: new Date().toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    }, 800);
+  }, [chatInput]);
 
   const handleExport = (format: string) => {
     console.log(`Exporting as ${format}...`);
@@ -44,21 +167,81 @@ export default function TactileSandboxPage() {
       className="flex flex-col w-full h-screen overflow-hidden"
       style={{ backgroundColor: "var(--hf-bg)" }}
     >
-      {/* ── Zone 1: Header ───────────────────────────────────────── */}
+      {/* Zone 1: Header */}
       <SandboxHeader onExportClick={() => setIsExportModalOpen(true)} />
 
-      {/* ── Below header: body ───────────────────────────────────── */}
+      {/* Body */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* ── Left column: score area ──────────────────────────── */}
+        {/* Left column */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-          {/* Palette — always full-width of left column */}
-          <ScorePalette className="h-[192px] shrink-0" />
+          {/* ScorePalette — search & filter wired */}
+          <ScorePalette
+            className="h-[192px] shrink-0"
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            filterOptions={["All Tools", ...TOOL_GROUPS]}
+          />
 
-          {/* Canvas — relative so ChatFAB can be absolutely positioned */}
+          {/* Canvas wrapper — relative for FAB + zoom controls */}
           <div className="relative flex-1 min-h-0">
-            <ScoreCanvas className="w-full h-full" />
+            <ScoreCanvas
+              className="w-full h-full"
+              style={{
+                transform: `scale(${zoom / 100})`,
+                transformOrigin: "top left",
+                width: `${10000 / zoom}%`,
+                height: `${10000 / zoom}%`,
+              }}
+            />
 
-            {/* ChatFAB — shown only when inspector is closed (Node t4vY4) */}
+            {/* Zoom controls — bottom-left of canvas */}
+            <div
+              className="absolute bottom-[28px] left-[24px] flex items-center gap-[4px] rounded-[6px] px-[8px] py-[6px]"
+              style={{
+                backgroundColor: "var(--hf-bg)",
+                border: "1px solid var(--hf-detail)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoom <= 50}
+                className="flex items-center justify-center w-[24px] h-[24px] rounded-[4px] transition-opacity hover:opacity-70 disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--hf-accent)"
+                aria-label="Zoom out"
+              >
+                <ZoomOut
+                  className="w-[14px] h-[14px]"
+                  style={{ color: "var(--hf-text-primary)" }}
+                  strokeWidth={1.75}
+                />
+              </button>
+
+              <span
+                className="font-mono text-[11px] font-medium tabular-nums w-[34px] text-center select-none"
+                style={{ color: "var(--hf-text-primary)" }}
+              >
+                {zoom}%
+              </span>
+
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoom >= 200}
+                className="flex items-center justify-center w-[24px] h-[24px] rounded-[4px] transition-opacity hover:opacity-70 disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--hf-accent)"
+                aria-label="Zoom in"
+              >
+                <ZoomIn
+                  className="w-[14px] h-[14px]"
+                  style={{ color: "var(--hf-text-primary)" }}
+                  strokeWidth={1.75}
+                />
+              </button>
+            </div>
+
+            {/* ChatFAB — shown only when inspector is closed */}
             {!isInspectorOpen && (
               <div className="absolute bottom-[28px] right-[28px]">
                 <ChatFAB onClick={() => setIsInspectorOpen(true)} />
@@ -84,21 +267,38 @@ export default function TactileSandboxPage() {
           />
         </div>
 
-        {/* ── Right column: Theory Inspector (380px) — hidden when closed ── */}
+        {/* Right column: Theory Inspector — resizable */}
         {isInspectorOpen && (
-          <div className="w-[380px] shrink-0 h-full overflow-hidden">
+          <div
+            className="relative shrink-0 h-full overflow-hidden flex"
+            style={{ width: inspectorWidth }}
+          >
+            {/* Drag handle — left edge */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-[5px] cursor-col-resize z-10 group"
+              onMouseDown={handleResizeStart}
+              title="Drag to resize"
+            >
+              {/* Visual indicator on hover */}
+              <div
+                className="absolute left-[2px] top-[50%] -translate-y-[50%] w-[1px] h-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ backgroundColor: "var(--hf-accent)" }}
+              />
+            </div>
+
             <TheoryInspectorPanel
-              className="h-full"
+              className="h-full flex-1"
+              messages={messages}
               inputValue={chatInput}
               onInputChange={setChatInput}
-              onSend={() => setChatInput("")}
+              onSend={handleSend}
               onClose={() => setIsInspectorOpen(false)}
             />
           </div>
         )}
       </div>
 
-      {/* ── Modals ───────────────────────────────────────────────── */}
+      {/* Modals */}
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}

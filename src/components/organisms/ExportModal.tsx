@@ -19,28 +19,32 @@ export function ExportModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Dim Overlay */}
+    /* Outer scroll container */
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Fixed dim backdrop */}
       <div
-        className="absolute inset-0 bg-[#2D1817] opacity-15 dark:opacity-30 transition-opacity"
+        className="fixed inset-0 bg-[#2D1817] opacity-15 dark:opacity-30 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Modal Container */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="export-modal-title"
-        className={cn(
-          "relative flex flex-row w-[1200px] h-[700px] max-w-[95vw] max-h-[90vh]",
-          "bg-[var(--hf-panel-bg)] rounded-[8px] shadow-[0_24px_80px_rgba(45,24,23,0.31)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]",
-          "border border-[var(--hf-detail)]",
-          className,
-        )}
-      >
-        <ScorePreviewPane />
-        <ExportOptionsPane onClose={onClose} onExport={onExport} />
+      {/* Centering wrapper — sits above the backdrop */}
+      <div className="relative flex min-h-full items-center justify-center p-4 pointer-events-none">
+        {/* Modal Container */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-modal-title"
+          className={cn(
+            "pointer-events-auto relative flex flex-row w-[1200px] h-[700px] max-w-[95vw] max-h-[90vh]",
+            "bg-[var(--hf-panel-bg)] rounded-[8px] shadow-[0_24px_80px_rgba(45,24,23,0.31)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.5)]",
+            "border border-[var(--hf-detail)]",
+            className,
+          )}
+        >
+          <ScorePreviewPane />
+          <ExportOptionsPane onClose={onClose} onExport={onExport} />
+        </div>
       </div>
     </div>
   );
