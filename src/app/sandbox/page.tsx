@@ -6,7 +6,10 @@ import { SandboxHeader } from "@/components/organisms/SandboxHeader";
 import { ScorePalette } from "@/components/organisms/ScorePalette";
 import { ScoreCanvas } from "@/components/organisms/ScoreCanvas";
 import { SandboxPlaybackBar } from "@/components/molecules/SandboxPlaybackBar";
-import { TheoryInspectorPanel } from "@/components/organisms/TheoryInspectorPanel";
+import {
+  TheoryInspectorPanel,
+  type TheoryInspectorMessage,
+} from "@/components/organisms/TheoryInspectorPanel";
 import { ExportModal } from "@/components/organisms/ExportModal";
 import { ChatFAB } from "@/components/atoms/ChatFAB";
 
@@ -27,6 +30,40 @@ const AI_REPLIES = [
   "The parallel fifths between Soprano and Alto at beat 3 violate strict voice-leading (Schenker, Free Composition §100).",
   "This cadential Ⅰ⁶₄ → V pattern is a standard suspension figure found throughout Classical-era counterpoint.",
   "The bass line descends by step through a filled-in third — a common *Bassbrechung* pattern.",
+];
+
+/** Initial mock data matching Pencil Node qmx1U ChatArea */
+const INITIAL_MESSAGES: TheoryInspectorMessage[] = [
+  {
+    id: "init-sys",
+    type: "system",
+    content: "SATB Voice Leading Violations",
+  },
+  {
+    id: "init-v1",
+    type: "violation",
+    violationType: "Parallel 5ths",
+    content: "Parallel 5ths between Tenor and Bass detected in m. 2",
+    timestamp: "09:42 AM",
+  },
+  {
+    id: "init-u1",
+    type: "user",
+    content: "Can you fix the parallel 5ths?",
+    timestamp: "09:43 AM",
+  },
+  {
+    id: "init-ai1",
+    type: "ai",
+    content:
+      "I recommend resolving the Bass down to C instead of moving parallel with the Tenor. Would you like me to apply this fix automatically?",
+    timestamp: "09:43 AM",
+  },
+  {
+    id: "init-chips1",
+    type: "chips",
+    chips: ["Apply Fix", "Show Alternate Options", "Ignore"],
+  },
 ];
 
 /**
@@ -100,16 +137,14 @@ export default function TactileSandboxPage() {
 
   // Chat state (edit 4)
   const [chatInput, setChatInput] = React.useState("");
-  const [messages, setMessages] = React.useState<
-    Array<{
-      id: string;
-      type: "system" | "user" | "ai" | "violation" | "divider" | "chips";
-      content?: string;
-      timestamp?: string;
-    }>
-  >([
-    { id: "sys-init", type: "system", content: "HarmonyForge Analysis ready." },
-  ]);
+  const [messages, setMessages] = React.useState<TheoryInspectorMessage[]>([]);
+
+  // Populate mock data when the inspector is opened
+  React.useEffect(() => {
+    if (isInspectorOpen && messages.length === 0) {
+      setMessages(INITIAL_MESSAGES);
+    }
+  }, [isInspectorOpen, messages.length]);
 
   const handleSend = React.useCallback(() => {
     const text = chatInput.trim();
