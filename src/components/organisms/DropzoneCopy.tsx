@@ -177,17 +177,6 @@ export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
               rx="20"
               fill={baseColor}
             />
-
-            {/* ── 6. Dark centre stripe (79ha5, clipped by fqxzb) ─────────── */}
-            {/* Design: fill:#1f1f1f, w:48, h:390 at x:755 y:70 in fqxzb.      */}
-            {/* fqxzb clip:true → only h:70 is visible (y:648 to y:718).        */}
-            <rect
-              x="755"
-              y="648"
-              width="48"
-              height="70"
-              fill={isDark ? "#3a1f1c" : "#1f1f1f"}
-            />
           </svg>
         </div>
       </>
