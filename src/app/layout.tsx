@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   description: "An Ante-hoc 'Glass Box' co-creative system for symbolic music.",
 };
 
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/components/atoms/ThemeProvider";
 
 export default function RootLayout({
   children,

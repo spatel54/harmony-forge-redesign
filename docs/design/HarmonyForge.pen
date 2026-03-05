@@ -4,8 +4,8 @@
     {
       "type": "frame",
       "id": "cMJCs",
-      "x": 9104,
-      "y": 11891,
+      "x": 16212,
+      "y": 12642,
       "name": "HarmonyForge — Color System",
       "width": 1160,
       "fill": "#1A1A1A",
@@ -5273,8 +5273,8 @@
     {
       "type": "frame",
       "id": "80t2V",
-      "x": 3765,
-      "y": 16857,
+      "x": 3593,
+      "y": 17708,
       "name": "PLAYGROUND - LIGHT",
       "clip": true,
       "width": 1728,
@@ -5550,8 +5550,8 @@
     {
       "type": "frame",
       "id": "PnDXj",
-      "x": 5744,
-      "y": 16865,
+      "x": 1748,
+      "y": 17708,
       "name": "PLAYGROUND - DARK",
       "clip": true,
       "width": 1728,
@@ -17666,7 +17666,7 @@
       "type": "frame",
       "id": "LxifV",
       "x": 5844,
-      "y": 19385,
+      "y": 19376,
       "name": "Export Modal — Sonata (Light)",
       "width": 1440,
       "height": 900,
@@ -19831,18 +19831,17 @@
                               "type": "icon_font",
                               "id": "kdpyw",
                               "name": "zipIco",
-                              "opacity": 0.7,
                               "width": 22,
                               "height": 22,
                               "iconFontName": "folder-archive",
                               "iconFontFamily": "lucide",
-                              "fill": "$text-on-light"
+                              "fill": "#000000"
                             },
                             {
                               "type": "text",
                               "id": "Lu0nB",
                               "name": "zipLbl",
-                              "fill": "$text-on-light",
+                              "fill": "#000000",
                               "content": "ZIP",
                               "fontFamily": "IBM Plex Mono",
                               "fontSize": 11,
@@ -19852,25 +19851,15 @@
                               "type": "text",
                               "id": "DKscc",
                               "name": "zipSub",
-                              "opacity": 0.5,
-                              "fill": "$text-on-light",
+                              "fill": "#000000",
                               "content": "All files",
-                              "fontFamily": "Inter",
-                              "fontSize": 10,
+                              "fontFamily": "IBM Plex Mono",
+                              "fontSize": 9,
                               "fontWeight": "normal"
                             }
                           ]
                         }
                       ]
-                    },
-                    {
-                      "type": "rectangle",
-                      "id": "9C7QO",
-                      "name": "optSep",
-                      "opacity": 0.5,
-                      "fill": "$sonata-detail",
-                      "width": "fill_container",
-                      "height": 1
                     }
                   ]
                 },
@@ -19950,8 +19939,8 @@
     {
       "type": "frame",
       "id": "Omclr",
-      "x": 9188,
-      "y": 19376,
+      "x": 9104,
+      "y": 19407,
       "name": "Tactile Sandbox — Sonata + Theory FAB",
       "width": 1440,
       "height": 948,
@@ -47390,7 +47379,7 @@
       "type": "frame",
       "id": "FlAan",
       "x": 4304,
-      "y": 22580,
+      "y": 22581,
       "name": "Tactile Sandbox — Nocturne (Full Width)",
       "width": 1440,
       "height": 948,
@@ -49748,7 +49737,7 @@
       "type": "frame",
       "id": "AcJnt",
       "x": 4304,
-      "y": 23688,
+      "y": 23695,
       "name": "Tactile Sandbox — Sonata (Full Width)",
       "width": 1440,
       "height": 948,
@@ -53222,17 +53211,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "frame",
-      "id": "bgpjZ",
-      "x": 12184,
-      "y": 19385,
-      "name": "Export Modal — Nocturne (Dark)",
-      "width": 1440,
-      "height": 900,
-      "fill": "$nocturne-bg",
-      "layout": "none"
     }
   ],
   "variables": {

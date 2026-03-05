@@ -1,6 +1,8 @@
 import React from "react";
 import { Music, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SandboxContextMenu } from "./SandboxContextMenu";
+import { useSandboxStore } from "@/store/useSandboxStore";
 
 export interface ScoreCanvasProps extends React.HTMLAttributes<HTMLDivElement> {
   staveLabels?: [string, string, string, string];
@@ -56,6 +58,8 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
     },
     ref,
   ) => {
+    const { openContextMenu } = useSandboxStore();
+
     // Stave definitions matching Pencil absolute coords
     const staves = [
       { y: 40, lines: 5, label: staveLabels[0], labelY: 50 },
@@ -93,6 +97,11 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
         )}
         role="img"
         aria-label="Score canvas — SATB grand staff"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openContextMenu(e.clientX, e.clientY);
+        }}
         {...props}
       >
         <svg
@@ -344,6 +353,8 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
           className="absolute inset-0 pointer-events-auto"
           aria-hidden="true"
         />
+
+        <SandboxContextMenu />
       </div>
     );
   },
