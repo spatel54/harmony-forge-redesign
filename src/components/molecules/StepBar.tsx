@@ -45,13 +45,15 @@ export const StepBar = React.forwardRef<HTMLDivElement, StepBarProps>(
                 role="listitem"
                 aria-current={isActive ? "step" : undefined}
                 onClick={isDone ? () => router.push(step.href) : undefined}
+                tabIndex={isPending ? -1 : undefined}
+                aria-disabled={isPending ? "true" : undefined}
                 className={cn(
                   "flex items-center gap-[5px] rounded-full px-[12px] py-[6px]",
                   "font-mono text-[11px] font-medium leading-none whitespace-nowrap",
                   isDone &&
                     "bg-[var(--hf-accent)] cursor-pointer hover:opacity-85 transition-opacity",
                   isActive && "bg-[var(--hf-surface)]",
-                  isPending && "bg-[var(--hf-surface)]/40",
+                  isPending && "bg-[var(--hf-surface)]/40 pointer-events-none",
                 )}
               >
                 {isDone && (

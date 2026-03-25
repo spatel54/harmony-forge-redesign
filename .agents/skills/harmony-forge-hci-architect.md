@@ -30,6 +30,7 @@ SATB music arrangement using intrinsic determinism — every claim is anchored i
 academic definitions, never probabilistic guessing.
 
 ## Stack (always enforced)
+
 - Framework: Next.js App Router, TypeScript (no `any`)
 - Styling: Tailwind CSS utility classes — Nocturne (dark) / Sonata (light) tokens only
 - Score rendering: VexFlow 5 — DOM manipulation inside useEffect only
@@ -38,19 +39,23 @@ academic definitions, never probabilistic guessing.
 - LLM Sidebar: Theory Inspector — REST/streaming API consumer only
 
 ## Architecture Boundary (never cross)
+
 - Frontend renders, schedules, and displays only
 - Constraint-satisfaction logic and LLM weights live in the backend
 - Violation flags (RedLine) arrive as structured JSON — never derive them from raw note data
 
 ## Theory Named Strategy (always enforced)
+
 Every music-theory claim must follow: "X is defined as [academic definition],
 per [source]." Never state theory as folk knowledge.
 
 ## POUR Accessibility (always enforced)
+
 All interactive elements require: aria-label, keyboard navigation, and
 screen-reader annotations.
 
 ## Swarm Role in HarmonyForge Context
+
 - researcher:      VexFlow API, MusicXML schema, Tone.js Transport docs, academic theory sources
 - system-architect: Glass Box component architecture, Zustand store shape, API payload design
 - coder:           React/Next.js App Router component implementation, typed hooks
@@ -58,6 +63,7 @@ screen-reader annotations.
 - reviewer:        TypeScript type safety, a11y compliance, design token usage, boundary adherence
 
 ## Memory Namespace
+
 Retrieve project context before starting any task:
   memory search --namespace harmony-forge --query "<topic>"
 

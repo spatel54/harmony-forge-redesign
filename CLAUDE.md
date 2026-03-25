@@ -1,15 +1,67 @@
 # Claude Code Configuration - Claude Flow V3
 
+## Always-Active Rules (MANDATORY — load every session)
+
+The following rule files are always in effect. Read each one before taking any action:
+
+- Interaction workflow (preview → gate → execute): `.claude/rules/hci-protocol.md`
+- Music theory constraints (Theory Named strategy, SATB, Glass Box): `.claude/rules/music-theory.md`
+- Code style and architecture boundaries (TypeScript, Tailwind, VexFlow, Tone.js): `.claude/rules/typescript-patterns.md`
+- Output completeness (no `// ...`, no skipped sections, no partial code): `.claude/rules/output-completeness.md`
+- Structured block few-shot examples: `.claude/rules/examples.md`
+- Context workflow (Research → Plan → Implement, loop vs. FIC, ADR trigger, context window rules): `.claude/rules/context-workflow.md`
+
 ## Behavioral Rules (Always Enforced)
 
 - Do what has been asked; nothing more, nothing less
 - NEVER create files unless they're absolutely necessary for achieving your goal
 - ALWAYS prefer editing an existing file to creating a new one
-- NEVER proactively create documentation files (*.md) or README files unless explicitly requested
+- NEVER proactively create documentation files (\*.md) or README files unless explicitly requested
 - NEVER save working files, text/mds, or tests to the root folder
 - Never continuously check status after spawning a swarm — wait for results
 - ALWAYS read a file before editing it
 - NEVER commit secrets, credentials, or .env files
+
+## 🛠 Skill Trigger Protocol
+
+- **Syntax**: Trigger specialists using `@skill-name`.
+- **Primary Repos**:
+  - `.claude/skills/`: Local orchestration agents (e.g., `@swarm-orchestration`).
+  - `references/antigravity-awesome-skills/`: 1000+ engineering specialists (e.g., `@typescript-expert`).
+  - `references/ui-ux-pro-max-skill/`: Design intelligence (e.g., `@taste-skill`).
+- **Commands**:
+  - Engineering/specialist skills: `python3 references/antigravity-awesome-skills/scripts/search.py <query> --limit 5`
+  - Design research: `python3 references/ui-ux-pro-max-skill/scripts/search.py`
+
+### Antigravity Skills Enforcement (ALWAYS REQUIRED)
+
+BEFORE starting any specialist task — coding, architecture, security, testing, DevOps, accessibility, or domain-specific work — you MUST:
+
+1. Run `python3 references/antigravity-awesome-skills/scripts/search.py <relevant-keywords> --limit 5`
+2. Read the top matching `SKILL.md` file at the returned path
+3. Apply the skill's constraints and patterns to your implementation
+
+Do NOT skip this step. It applies to every non-trivial task. The catalog has 1006 skills — there is almost always a relevant specialist. Surface the top results before writing any code.
+
+## 🚀 Top Orchestration & Core Skills
+
+| Trigger                            | Focus           | Purpose                                       |
+| :--------------------------------- | :-------------- | :-------------------------------------------- |
+| **`@swarm-orchestration`**         | Multi-Agent     | Spawn complex parallel development tasks.     |
+| **`@v3-ddd-architecture`**         | Domain Design   | Enforce DDD for music theory core logic.      |
+| **`@agentdb-memory-patterns`**     | Project Memory  | Manage HNSW search and hybrid memory context. |
+| **`@verification-quality`**        | QA/Testing      | Automated verification and linting protocols. |
+| **`@sparc-methodology`**           | Workflow        | Systemic Spec -> Plan -> Action -> Review.    |
+| **`@pair-programming`**            | Collaboration   | Optimized mode for real-time pairing.         |
+| **`@skill-builder`**               | Customization   | Create new, permanent project skills.         |
+| **`rule:music-theory.md`**         | Academic        | Enforce strict "Theory Named" definitions.    |
+| **`rule:hci-protocol.md`**         | UI/UX           | Modular, "Glass Box" UI engineering rules.    |
+| **`rule:typescript-patterns.md`**  | Code Quality    | Strict typing and performance for Next.js 15. |
+| **`@github-code-review`**          | Code Review     | Systematic, line-by-line repo audits.         |
+| **`@v3-swarm-coordination`**       | Advanced Swarm  | Parallelize tasks across 15+ agents.          |
+| **`@stream-chain`**                | Visualization   | Trace complex logical flows during execution. |
+| **`@browser`**                     | UI Verification | Automated Playwright verification.            |
+| **`@v3-performance-optimization`** | Optimization    | Next.js bundle and hydration tuning.          |
 
 ## File Organization
 
@@ -80,11 +132,11 @@ npm run lint
 
 ### 3-Tier Model Routing (ADR-026)
 
-| Tier | Handler | Latency | Cost | Use Cases |
-|------|---------|---------|------|-----------|
-| **1** | Agent Booster (WASM) | <1ms | $0 | Simple transforms (var→const, add types) — Skip LLM |
-| **2** | Haiku | ~500ms | $0.0002 | Simple tasks, low complexity (<30%) |
-| **3** | Sonnet/Opus | 2-5s | $0.003-0.015 | Complex reasoning, architecture, security (>30%) |
+| Tier  | Handler              | Latency | Cost         | Use Cases                                           |
+| ----- | -------------------- | ------- | ------------ | --------------------------------------------------- |
+| **1** | Agent Booster (WASM) | <1ms    | $0           | Simple transforms (var→const, add types) — Skip LLM |
+| **2** | Haiku                | ~500ms  | $0.0002      | Simple tasks, low complexity (<30%)                 |
+| **3** | Sonnet/Opus          | 2-5s    | $0.003-0.015 | Complex reasoning, architecture, security (>30%)    |
 
 - Always check for `[AGENT_BOOSTER_AVAILABLE]` or `[TASK_MODEL_RECOMMENDATION]` before spawning agents
 - Use Edit tool directly when `[AGENT_BOOSTER_AVAILABLE]`
@@ -114,16 +166,16 @@ npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --
 
 ### Core Commands
 
-| Command | Subcommands | Description |
-|---------|-------------|-------------|
-| `init` | 4 | Project initialization |
-| `agent` | 8 | Agent lifecycle management |
-| `swarm` | 6 | Multi-agent swarm coordination |
-| `memory` | 11 | AgentDB memory with HNSW search |
-| `task` | 6 | Task creation and lifecycle |
-| `session` | 7 | Session state management |
-| `hooks` | 17 | Self-learning hooks + 12 workers |
-| `hive-mind` | 6 | Byzantine fault-tolerant consensus |
+| Command     | Subcommands | Description                        |
+| ----------- | ----------- | ---------------------------------- |
+| `init`      | 4           | Project initialization             |
+| `agent`     | 8           | Agent lifecycle management         |
+| `swarm`     | 6           | Multi-agent swarm coordination     |
+| `memory`    | 11          | AgentDB memory with HNSW search    |
+| `task`      | 6           | Task creation and lifecycle        |
+| `session`   | 7           | Session state management           |
+| `hooks`     | 17          | Self-learning hooks + 12 workers   |
+| `hive-mind` | 6           | Byzantine fault-tolerant consensus |
 
 ### Quick CLI Examples
 
@@ -138,18 +190,23 @@ npx @claude-flow/cli@latest doctor --fix
 ## Available Agents (60+ Types)
 
 ### Core Development
+
 `coder`, `reviewer`, `tester`, `planner`, `researcher`
 
 ### Specialized
+
 `security-architect`, `security-auditor`, `memory-specialist`, `performance-engineer`
 
 ### Swarm Coordination
+
 `hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`
 
 ### GitHub & Repository
+
 `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`
 
 ### SPARC Methodology
+
 `sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`
 
 ## Memory Commands Reference
@@ -184,5 +241,72 @@ npx @claude-flow/cli@latest doctor --fix
 
 ## Support
 
-- Documentation: https://github.com/ruvnet/claude-flow
-- Issues: https://github.com/ruvnet/claude-flow/issues
+- Documentation: <https://github.com/ruvnet/claude-flow>
+- Issues: <https://github.com/ruvnet/claude-flow/issues>
+
+## Frequent Intentional Compaction (FIC) Workflow
+
+FIC is a three-phase workflow for complex, multi-turn implementation tasks.
+Each phase ends with an explicit `/compact` call, so the next phase begins with
+a dense, structured context (the artifact file) rather than a degraded
+conversation history. Use FIC for any task that spans more than one session or
+touches more than ~4 subtasks (Liu et al., 2023 — "lost in the middle").
+
+### When to Use FIC
+
+- Feature implementation touching more than 3 files
+- Bug investigations requiring codebase exploration before a fix
+- Refactors needing a plan before any code is written
+- Any task where context degradation across turns is a realistic risk
+
+### The Three Commands
+
+| Command | Purpose | Run `/compact` after? |
+| --- | --- | --- |
+| `/research_codebase <topic>` | Explore codebase; write timestamped research artifact | Yes — always |
+| `/create_plan <topic>` | Read research; write phased plan artifact with confirmation gate | Yes — always |
+| `/implement_plan <topic> phase:<N>` | Execute one plan phase; verify; update artifact status | Yes — if more phases remain |
+
+### Artifact Locations
+
+All FIC artifacts live inside `.claude/thoughts/shared/` — never in the root folder.
+
+```text
+.claude/thoughts/shared/
+  research/   ← YYYY-MM-DD_HH-MM-SS_<slug>.md  (timestamped, one per research pass)
+  plans/      ← <slug>.md  (overwritten on re-plan — idempotent)
+```
+
+Directories are created automatically on first use.
+
+### Standard FIC Sequence
+
+```text
+1. /research_codebase <topic>
+2. /compact
+3. /create_plan <topic>
+   → confirm gate → "Yes"
+4. /compact
+5. /implement_plan <topic> phase:1
+6. /compact
+7. /implement_plan <topic> phase:2
+8. /compact
+   ... (repeat for each phase)
+```
+
+### Integration with HCI Protocol
+
+FIC does not bypass the preview → gate → execute workflow. `/create_plan`
+produces the XML structured block (`<context>`, `<task>`, `<constraints>`,
+`<output>`) and ends with the verbatim confirmation gate before writing any
+plan. `/implement_plan` emits a scope statement and pauses before executing.
+
+### Integration with Antigravity Skills
+
+All three FIC commands begin with a mandatory Antigravity skill search (Step 0).
+The skill name is recorded in every artifact header so the constraint source is
+auditable across sessions. The search command:
+
+```bash
+python3 references/antigravity-awesome-skills/scripts/search.py <topic> --limit 5
+```

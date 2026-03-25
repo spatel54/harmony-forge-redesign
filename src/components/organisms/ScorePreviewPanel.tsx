@@ -5,6 +5,12 @@ import { PlaybackBar } from "@/components/molecules/PlaybackBar";
 export interface ScorePreviewPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   scoreTitle?: string;
   scoreMeta?: string;
+  /** Dynamic aria-label for the score canvas — e.g. "Score preview: The First Noel" */
+  canvasAriaLabel?: string;
+  /** Uploaded filename — when present, shows "Reviewing: [filename]" context line */
+  filename?: string;
+  /** Called when user clicks "Change file" — typically routes back to / */
+  onChangeFile?: () => void;
   onReupload?: () => void;
 }
 
@@ -22,6 +28,9 @@ export const ScorePreviewPanel = React.forwardRef<
     {
       scoreTitle = "The First Noel",
       scoreMeta = "Traditional • 4 voices • Page 1 of 4",
+      canvasAriaLabel,
+      filename,
+      onChangeFile,
       onReupload,
       className,
       ...props
@@ -108,6 +117,29 @@ export const ScorePreviewPanel = React.forwardRef<
               Traditional
             </span>
           </div>
+
+          {/* Reviewing context — visible only when filename is provided */}
+          {filename && (
+            <p
+              className="font-mono text-[10px] font-normal leading-none text-center mt-[6px]"
+              style={{ color: "var(--hf-text-sub)" }}
+            >
+              Reviewing: {filename}
+              {onChangeFile && (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    onClick={onChangeFile}
+                    className="underline underline-offset-2 hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hf-accent)]"
+                    style={{ color: "var(--hf-text-sub)" }}
+                  >
+                    Change file
+                  </button>
+                </>
+              )}
+            </p>
+          )}
         </div>
 
         {/* Score Canvas — Node qkNNs — VexFlow placeholder */}
@@ -116,8 +148,8 @@ export const ScorePreviewPanel = React.forwardRef<
             "flex-1 min-h-0 w-full rounded-[8px] overflow-hidden relative",
             "border border-[var(--hf-detail)] score-canvas-container",
           )}
-          aria-label="Score preview canvas"
           role="img"
+          aria-label={canvasAriaLabel ?? "Score preview canvas"}
         >
           {/* Static staff-line grid matching design placeholder */}
           <StaffLinePlaceholder />

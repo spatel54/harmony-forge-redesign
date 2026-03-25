@@ -12,15 +12,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSandboxStore } from "@/store/useSandboxStore";
+import { usePlayback } from "@/lib/audio/usePlayback";
 
 export interface SandboxPlaybackBarProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   subtitle?: string;
-  isPlaying?: boolean;
   currentPage?: number;
   totalPages?: number;
-  onPlayPause?: () => void;
-  onSkipBack?: () => void;
   onRewind?: () => void;
   onFastForward?: () => void;
   onSkipForward?: () => void;
@@ -56,11 +55,8 @@ export const SandboxPlaybackBar = React.forwardRef<
     {
       title = "Sonata in C Major",
       subtitle = "W.A. Mozart • K. 545",
-      isPlaying = false,
       currentPage = 1,
       totalPages = 4,
-      onPlayPause,
-      onSkipBack,
       onRewind,
       onFastForward,
       onSkipForward,
@@ -71,6 +67,21 @@ export const SandboxPlaybackBar = React.forwardRef<
     },
     ref,
   ) => {
+    // Read playback state from store; drive transport via hook
+    const isPlaying = useSandboxStore((s) => s.isPlaying);
+    const { play, pause, stop } = usePlayback();
+
+    const handlePlayPause = React.useCallback(() => {
+      if (isPlaying) {
+        pause();
+      } else {
+        // play() is async — fire-and-forget; errors surface in console only
+        play().catch((err: unknown) => {
+          console.error("[SandboxPlaybackBar] play() failed:", err);
+        });
+      }
+    }, [isPlaying, play, pause]);
+
     const iconBtn =
       "flex items-center justify-center transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--hf-accent)";
 
@@ -111,11 +122,11 @@ export const SandboxPlaybackBar = React.forwardRef<
           role="group"
           aria-label="Transport"
         >
-          {/* skip-back — 16×16 */}
+          {/* skip-back / stop — 16×16 */}
           <button
             type="button"
-            onClick={onSkipBack}
-            aria-label="Skip to beginning"
+            onClick={stop}
+            aria-label="Stop and return to beginning"
             className={cn(iconBtn, "w-[32px] h-[32px] rounded-[4px]")}
             style={{ color: "var(--hf-text-primary)" }}
           >
@@ -144,8 +155,9 @@ export const SandboxPlaybackBar = React.forwardRef<
           {/* Play / Pause — 40×36 r:20 (pill) */}
           <button
             type="button"
-            onClick={onPlayPause}
-            aria-label={isPlaying ? "Pause" : "Play"}
+            onClick={handlePlayPause}
+            aria-label={isPlaying ? "Pause arrangement" : "Play arrangement"}
+            aria-pressed={isPlaying}
             className={cn(iconBtn, "w-[40px] h-[36px] rounded-[20px]")}
             style={{
               backgroundColor: "var(--hf-text-primary)",

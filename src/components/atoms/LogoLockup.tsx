@@ -15,6 +15,8 @@ export const LogoLockup = React.forwardRef<HTMLDivElement, LogoLockupProps>(
     return (
       <div
         ref={ref}
+        role="img"
+        aria-label="HarmonyForge — Glass Box SATB Arrangement"
         className={cn("flex items-center gap-[10px]", className)}
         {...props}
       >
@@ -34,8 +36,9 @@ export const LogoLockup = React.forwardRef<HTMLDivElement, LogoLockupProps>(
           />
         </div>
 
-        {/* Node TDV8d: Brand wordmark */}
+        {/* Node TDV8d: Brand wordmark — aria-hidden; accessible name lives on the role="img" container */}
         <span
+          aria-hidden="true"
           className="font-brand text-[22px] font-normal leading-none"
           style={{ color: "var(--hf-text-primary)" }}
         >

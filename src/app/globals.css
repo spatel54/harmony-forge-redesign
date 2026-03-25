@@ -20,11 +20,9 @@
   --color-hf-violation: #d32f2f;
   --color-hf-warning: #1976d2;
   --color-hf-override: #7b1fa2;
-
-  /* Typography — MASTER.md §2 */
-  --font-brand: "Instrument Serif", serif;
-  --font-body: "Inter", sans-serif;
-  --font-system: "Satoshi", "SF Pro", ui-monospace, monospace;
+  /* Accessible accent — WCAG §1.4.11 (3:1 UI) + §1.4.3 (4.5:1 text) on Sonata bg */
+  /* #b87800 on #fdf5e6 = 3.37:1; #1a1a1a on #b87800 = 4.78:1 */
+  --color-hf-accent-accessible: var(--hf-accent-accessible);
 
   /* Spacing — 8-pt grid, MASTER.md §3 */
   --spacing-minor: 2px;
@@ -56,6 +54,27 @@
   --z-modal: 20;
   --z-drawer: 30;
   --z-critical: 50;
+
+  /* Reset Tailwind v4 built-in font-family theme variables.
+     Tailwind v4.2.x generates a broken `.font-[family-name:var(...)]`
+     template class for every --font-* variable in @theme. Turbopack's
+     strict CSS parser rejects `var(...)` with a literal ellipsis.
+     Setting these to `initial` removes them from @theme so the broken
+     class is never emitted. Manual .font-* classes below take over. */
+  --font-sans: initial;
+  --font-serif: initial;
+  --font-mono: initial;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Typography tokens — outside @theme to avoid Tailwind v4
+   generating broken font-[family-name:var(...)] utility classes.
+   Manual .font-* utility classes are defined below (line ~131).
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --font-brand: "Instrument Serif", serif;
+  --font-body: "Inter", sans-serif;
+  --font-system: "Satoshi", "SF Pro", ui-sans-serif, sans-serif;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -67,6 +86,7 @@
   --hf-surface: var(--sonata-surface, #9e4b3e);
   --hf-detail: var(--sonata-detail, #d2b48c);
   --hf-accent: var(--sonata-accent, #ffb300);
+  --hf-accent-accessible: var(--sonata-accent-accessible, #b87800);
   --hf-text-primary: #1a1a1a;
   --hf-text-secondary: #6b5740;
   /* Alias used by PlaybackBar / score meta text */
@@ -124,6 +144,9 @@
    Font utility classes — match .pen fontFamily values exactly
    Use className="font-brand" / "font-body" / "font-mono" etc.
    ───────────────────────────────────────────────────────────── */
+.font-sans {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
 .font-brand {
   font-family: var(--font-fraunces), "Fraunces", serif;
 }
@@ -160,9 +183,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Focus rings — POUR, MASTER.md §7 */
+/* Focus rings — POUR, MASTER.md §7 — uses accessible token (3.37:1 on Sonata bg) */
 :focus-visible {
-  outline: 2px solid var(--hf-accent);
+  outline: 2px solid var(--hf-accent-accessible);
   outline-offset: 2px;
 }
 
@@ -172,7 +195,7 @@ body {
   top: -9999px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--hf-accent);
+  background: var(--hf-accent-accessible);
   color: #1a1a1a;
   padding: 8px 16px;
   border-radius: var(--radius-standard);
@@ -214,6 +237,7 @@ body {
   --sonata-surface-90: #9e4b3ee6;
   --sonata-detail: #d2b48c;
   --sonata-accent: #ffb300;
+  --sonata-accent-accessible: #b87800; /* 3.37:1 on --sonata-bg; WCAG §1.4.11 + §1.4.3 */
   --sonata-accent-10: #ffb3001a;
   --sonata-accent-70: #ffb300b3;
   --sonata-accent-90: #ffb300e6;

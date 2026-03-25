@@ -29,6 +29,24 @@ Format: `## [YYYY-MM-DD] — <title>`
 
 ---
 
+## [2026-03-10] — PROGRESS.md Rule Added
+
+**Correction.** Superman instructed that all session learnings must go through `PROGRESS.md`.
+
+**Rule added to `/Users/shivpat/CLAUDE.md` under `### Learned Rules`:**
+All gap discoveries, state changes, key decisions, and reorganization progress must be written to `PROGRESS.md` at the project root per session. It is distinct from `notes/journey.md` (correction loop) and `IMPLEMENTATION_PLAN.md` (task list).
+
+**Files changed:**
+
+| File | Change |
+| --- | --- |
+| `/Users/shivpat/CLAUDE.md` | Added learned rule under `### Learned Rules` |
+| `PROGRESS.md` | Created — first session entry added |
+| `docs/notes/journey.md` | This entry |
+| `MEMORY.md` | Updated with PROGRESS.md behavioral commitment |
+
+---
+
 ## [2026-03-01] — Critical Partner Rule Added
 
 **Milestone.** Superman requested the assistant function as a critical thinking partner,

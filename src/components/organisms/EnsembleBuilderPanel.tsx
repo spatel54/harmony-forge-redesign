@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoiceDropdown } from "@/components/molecules/VoiceDropdown";
 import { EnsemblePreviewCard, type SelectedPart } from "@/components/molecules/EnsemblePreviewCard";
 import type { VoiceType } from "@/components/atoms/PartChip";
+import { useEnsembleStore } from "@/store/useEnsembleStore";
+import { useUploadStore } from "@/store/useUploadStore";
 
 /** Placeholder instrument lists per voice — replaced by backend data later */
 const VOICE_INSTRUMENTS: Record<VoiceType, string[]> = {
@@ -26,45 +28,33 @@ export interface EnsembleBuilderPanelProps
  * EnsembleBuilderPanel Organism
  * Extracted from Pencil Node ID: ZlAUA ("Ensemble Builder Panel")
  * Right column: heading → 4 VoiceDropdowns → divider → EnsemblePreviewCard → Generate CTA.
- * Manages local selection state for each voice. Client component.
+ * Reads/writes voice selections via useEnsembleStore. Client component.
  */
 export const EnsembleBuilderPanel = React.forwardRef<
   HTMLDivElement,
   EnsembleBuilderPanelProps
 >(({ onGenerateHarmonies, className, ...props }, ref) => {
-  // Local selection state: voice → Set of selected instrument labels
-  const [selections, setSelections] = useState<Record<VoiceType, string[]>>({
-    soprano: ["Soprano Voice", "Flute"],
-    alto: ["Alto Voice", "Clarinet"],
-    tenor: ["Tenor Voice", "Trumpet", "Cello"],
-    bass: ["Bass Voice", "Bassoon", "Double Bass"],
-  });
+  const voices = useEnsembleStore((s) => s.voices);
+  const toggleVoiceInstrument = useEnsembleStore((s) => s.toggleVoiceInstrument);
+  const fileValid = useUploadStore((s) => s.fileValid);
+  const isDisabled = !fileValid;
 
   const handleToggle = (voice: VoiceType, instrument: string) => {
-    setSelections((prev) => {
-      const current = prev[voice];
-      return {
-        ...prev,
-        [voice]: current.includes(instrument)
-          ? current.filter((i) => i !== instrument)
-          : [...current, instrument],
-      };
-    });
+    toggleVoiceInstrument(voice, instrument);
   };
 
   const handleRemovePart = (label: string) => {
-    setSelections((prev) => {
-      const next = { ...prev };
-      for (const voice of VOICE_ORDER) {
-        next[voice] = next[voice].filter((i) => i !== label);
+    for (const voice of VOICE_ORDER) {
+      if (voices[voice].includes(label)) {
+        toggleVoiceInstrument(voice, label);
+        break;
       }
-      return next;
-    });
+    }
   };
 
   // Flatten all selected parts into SelectedPart[] for preview card
   const selectedParts: SelectedPart[] = VOICE_ORDER.flatMap((voice) =>
-    selections[voice].map((label) => ({ label, voice })),
+    voices[voice].map((label) => ({ label, voice })),
   );
 
   return (
@@ -104,7 +94,7 @@ export const EnsembleBuilderPanel = React.forwardRef<
             key={voice}
             voice={voice}
             instruments={VOICE_INSTRUMENTS[voice]}
-            selected={selections[voice]}
+            selected={voices[voice]}
             onToggle={(instrument) => handleToggle(voice, instrument)}
           />
         ))}
@@ -131,18 +121,22 @@ export const EnsembleBuilderPanel = React.forwardRef<
       <div className="flex justify-end w-full">
         <button
           type="button"
-          onClick={onGenerateHarmonies}
+          onClick={isDisabled ? undefined : onGenerateHarmonies}
+          aria-label="Generate harmonies and open score in Sandbox"
+          aria-disabled={isDisabled ? "true" : undefined}
           className={cn(
             "flex items-center gap-[8px] rounded-[6px] px-[24px] py-[12px]",
             "font-mono text-[13px] font-bold leading-none",
-            "transition-opacity duration-150 hover:opacity-90 active:opacity-80",
+            "transition-opacity duration-150",
+            isDisabled
+              ? "opacity-40 pointer-events-none cursor-default"
+              : "hover:opacity-90 active:opacity-80",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hf-surface)]",
           )}
           style={{
             backgroundColor: "var(--hf-accent)",
             color: "var(--text-on-light)",
           }}
-          aria-label="Generate harmonies"
         >
           <Sparkles
             className="w-4 h-4 shrink-0"

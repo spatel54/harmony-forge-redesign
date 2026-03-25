@@ -11,6 +11,16 @@ export interface DropzoneCopyProps extends React.HTMLAttributes<HTMLDivElement> 
   onFileSelect?: (files: FileList) => void;
 }
 
+const ALLOWED_EXTENSIONS = new Set([".pdf", ".xml", ".mxl", ".midi", ".mid"]);
+
+function getExtension(filename: string): string {
+  return "." + filename.split(".").pop()?.toLowerCase();
+}
+
+function isValidFile(file: File): boolean {
+  return ALLOWED_EXTENSIONS.has(getExtension(file.name));
+}
+
 /**
  * Exact layout replication of Node 80t2V central content.
  * Combines the Canvas (ktaiB) and Stand (n4ubU) into a single scalable ratio wrapper.
@@ -19,6 +29,7 @@ export interface DropzoneCopyProps extends React.HTMLAttributes<HTMLDivElement> 
 export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
   ({ className, onFileDrop, onFileSelect, ...props }, ref) => {
     const [isHovered, setIsHovered] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
     const { resolvedTheme } = useTheme();
     // Render light-mode defaults on SSR and the first client paint to prevent hydration mismatch.
@@ -42,9 +53,16 @@ export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
     const handleDrop = (e: React.DragEvent) => {
       e.preventDefault();
       setIsHovered(false);
-      if (e.dataTransfer.files && onFileDrop) {
-        onFileDrop(e.dataTransfer.files);
+      if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+      const file = e.dataTransfer.files[0];
+      if (!isValidFile(file)) {
+        setErrorMessage(
+          "Unsupported file type. Please upload MusicXML, MIDI, or PDF."
+        );
+        return;
       }
+      setErrorMessage(null);
+      onFileDrop?.(e.dataTransfer.files);
     };
 
     const handleClick = () => {
@@ -52,11 +70,18 @@ export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files.length > 0) {
-        onFileSelect
-          ? onFileSelect(e.target.files)
-          : onFileDrop?.(e.target.files);
+      if (!e.target.files || e.target.files.length === 0) return;
+      const file = e.target.files[0];
+      if (!isValidFile(file)) {
+        setErrorMessage(
+          "Unsupported file type. Please upload MusicXML, MIDI, or PDF."
+        );
+        return;
       }
+      setErrorMessage(null);
+      onFileSelect
+        ? onFileSelect(e.target.files)
+        : onFileDrop?.(e.target.files);
     };
 
     // Nocturne (Dark) — from globals.css & Node PnDXj
@@ -151,8 +176,8 @@ export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
                 width="474"
                 height="566"
                 rx="20"
-                stroke={strokeColor}
-                strokeOpacity={isHovered ? "1" : "0.5"}
+                stroke={errorMessage ? "var(--color-hf-violation)" : strokeColor}
+                strokeOpacity={isHovered || errorMessage ? "1" : "0.5"}
                 strokeWidth="2"
                 strokeDasharray="10 5"
                 className="transition-colors duration-300"
@@ -163,6 +188,20 @@ export const DropzoneCopy = React.forwardRef<HTMLDivElement, DropzoneCopyProps>(
               <foreignObject x="482.5" y="41" width="474" height="566">
                 <div className="w-full h-full flex flex-col items-center justify-center pointer-events-auto gap-4 px-8">
                   <UploadPromptContent isDark={isDark} />
+                  {/* Error message — aria-live announces to screen readers on change */}
+                  <div
+                    aria-live="polite"
+                    role="status"
+                    className="text-center text-xs font-medium leading-snug"
+                    style={{
+                      color: errorMessage
+                        ? "var(--color-hf-violation)"
+                        : "transparent",
+                      minHeight: "2.5rem",
+                    }}
+                  >
+                    {errorMessage ?? ""}
+                  </div>
                 </div>
               </foreignObject>
             </g>

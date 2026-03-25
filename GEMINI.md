@@ -1,10 +1,11 @@
 Revised Interaction Guidelines (Frontend Focus)
 <userPreferences>
+
 - Prefers a single, cohesive Markdown document.
 - Wants the assistant to wait for explicit approval before executing any task.
 - Tone should remain concise, instructional, professional, and academically rigorous.
-**- Prefers modular, component-driven code using TypeScript, Next.js, and Tailwind CSS.**
-</userPreferences>
+  **- Prefers modular, component-driven code using TypeScript, Next.js, and Tailwind CSS.**
+  </userPreferences>
 
 <context>
 - Previously supplied:
@@ -13,6 +14,25 @@ Revised Interaction Guidelines (Frontend Focus)
   3. A Key Points to Enforce section.
 - The user clarified they want “Everything else,” meaning all of the above content combined into one Markdown file.
 - Project Context: HarmonyForge, an Ante-hoc "Glass Box" co-creative system. **The current focus is the Frontend UI, which consists of a "Tactile Sandbox" (rendering symbolic music via VexFlow, playback via Tone.js, state management via Zustand) and a "Theory Inspector" (sidebar UI for LLM-driven explainability).**
+
+<skills>
+**Top 15 Frontend Skills (from @antigravity-awesome-skills & @ui-ux-pro-max):**
+1. `@tailwind-patterns` (v4 Design Tokens)
+2. `@ui-ux-pro-max` (Premium Visuals)
+3. `@framer-motion-patterns` (Micro-animations)
+4. `@wcag-audit-patterns` (Accessibility)
+5. `@typescript-expert` (Type-safe UI)
+6. `@zustand-store-ts` (State Management)
+7. `@vexflow-expert` (Score Rendering)
+8. `@react-patterns` (Next.js 15 optimization)
+9. `@taste-skill` (No-placeholder rule)
+10. `search --domain style` (Aesthetic Prompts)
+11. `search --domain ux` (SVG Interaction best practices)
+12. `@senior-architect` (Feature Blueprinting)
+13. `@vibe-code-auditor` (Structure Validation)
+14. `@docs-architect` (Component Docs)
+15. `@browser` (Visual Regression)
+</skills>
 </context>
 
 <constraints>
@@ -22,6 +42,8 @@ Revised Interaction Guidelines (Frontend Focus)
 - For any music theory or logic tasks, explicitly employ the "Theory Named" strategy to anchor the response in rigorous academic definitions.
 **- Maintain a strict boundary between UI rendering/state management (Frontend) and the deterministic algorithmic logic (Backend). Do not attempt to generate "Black Box" audio synthesis; all music handling must be symbolic (MusicXML/JSON).**
 **- Ensure all UI components adhere to accessibility (POUR) principles and support "Edit-Authority" (e.g., keyboard navigation, drag-and-drop SVG manipulation).**
+- **Skill Stacking**: Combine specialties (e.g., `@typescript-expert @tailwind-patterns`) for high-context tasks.
+- **Search First**: Query `ui-ux-pro-max` before proposing new UI patterns.
 </constraints>
 
 <tasks>
@@ -44,8 +66,10 @@ Convert the entire set of instructions — including the XML-like preview block,
 • The confirmation question must be the final line of the preview so the user sees it clearly.
 • The assistant remains idle until explicit permission is received.
 
---------------------------------------------------------------------------------
+---
+
 Mentor's Rationale for the Revisions
+
 1. Tech Stack Injection (Context & Preferences): LLMs will default to generic HTML/CSS or basic React if not strictly bound. By explicitly defining the stack (Next.js, TypeScript, Tailwind, VexFlow, Tone.js, Zustand), you force the model to generate production-ready code that matches your PRD.
 2. Domain-Specific Constraints: I added constraints specifically preventing the LLM from hallucinating audio synthesis (a common mistake when asking AI for "music apps"). The prompt now strictly enforces that the frontend only handles symbolic data (MusicXML/JSON) and renders it visually/audibly via VexFlow and Tone.js.
 3. UI/UX Philosophy Integration: I embedded your core novelty points ("Tactile Sandbox", "Theory Inspector", "Edit-Authority", and "Red Line" tooltips) directly into the instructions. This ensures that when the AI designs a component, it prioritizes interactive manipulation (dragging notes) and transparency, rather than just static display.

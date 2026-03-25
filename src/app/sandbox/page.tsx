@@ -12,6 +12,8 @@ import {
 } from "@/components/organisms/TheoryInspectorPanel";
 import { ExportModal } from "@/components/organisms/ExportModal";
 import { ChatFAB } from "@/components/atoms/ChatFAB";
+import { ScorePaginationDock } from "@/components/molecules/ScorePaginationDock";
+import { useSandboxStore } from "@/store/useSandboxStore";
 
 const TOOL_GROUPS = [
   "SCORE",
@@ -78,10 +80,26 @@ const INITIAL_MESSAGES: TheoryInspectorMessage[] = [
  *  - Inspector close/open with ChatFAB
  */
 export default function TactileSandboxPage() {
-  // Playback
-  const [isPlaying, setIsPlaying] = React.useState(false);
+  // Playback state lives in useSandboxStore (TASK-A22/A23)
+  // isPlaying is read inside SandboxPlaybackBar directly
   const [currentPage, setCurrentPage] = React.useState(1);
   const totalPages = 4;
+
+  // Score maximize (AC-006)
+  const isExpanded = useSandboxStore((s) => s.isExpanded);
+  const setExpanded = useSandboxStore((s) => s.setExpanded);
+
+  // Escape key collapses expanded score
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      setExpanded(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [setExpanded]);
 
   // Export modal
   const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
@@ -196,15 +214,17 @@ export default function TactileSandboxPage() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Left column */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-          {/* ScorePalette — search & filter wired */}
-          <ScorePalette
-            className="h-[192px] shrink-0"
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            filterOptions={["All Tools", ...TOOL_GROUPS]}
-          />
+          {/* ScorePalette — hidden in expanded mode */}
+          {!isExpanded && (
+            <ScorePalette
+              className="h-[192px] shrink-0"
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              filterOptions={["All Tools", ...TOOL_GROUPS]}
+            />
+          )}
 
           {/* Canvas wrapper — relative for FAB + zoom controls */}
           <div className="relative flex-1 min-h-0">
@@ -264,6 +284,14 @@ export default function TactileSandboxPage() {
               </button>
             </div>
 
+            {/* ScorePaginationDock — bottom-center of canvas */}
+            <ScorePaginationDock
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            />
+
             {/* ChatFAB — shown only when inspector is closed */}
             {!isInspectorOpen && (
               <div className="absolute bottom-[28px] right-[28px]">
@@ -272,26 +300,25 @@ export default function TactileSandboxPage() {
             )}
           </div>
 
-          {/* Playback bar */}
-          <SandboxPlaybackBar
-            className="shrink-0"
-            title="Sonata in C Major"
-            subtitle="W.A. Mozart • K. 545"
-            isPlaying={isPlaying}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPlayPause={() => setIsPlaying((p) => !p)}
-            onSkipBack={() => setCurrentPage(1)}
-            onSkipForward={() => setCurrentPage(totalPages)}
-            onPrevPage={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            onNextPage={() =>
-              setCurrentPage((p) => Math.min(totalPages, p + 1))
-            }
-          />
+          {/* Playback bar — hidden in expanded mode */}
+          {!isExpanded && (
+            <SandboxPlaybackBar
+              className="shrink-0"
+              title="Sonata in C Major"
+              subtitle="W.A. Mozart • K. 545"
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onSkipForward={() => setCurrentPage(totalPages)}
+              onPrevPage={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              onNextPage={() =>
+                setCurrentPage((p) => Math.min(totalPages, p + 1))
+              }
+            />
+          )}
         </div>
 
-        {/* Right column: Theory Inspector — resizable */}
-        {isInspectorOpen && (
+        {/* Right column: Theory Inspector — hidden in expanded mode */}
+        {isInspectorOpen && !isExpanded && (
           <div
             className="relative shrink-0 h-full overflow-hidden flex"
             style={{ width: inspectorWidth }}

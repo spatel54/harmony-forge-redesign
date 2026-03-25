@@ -37,11 +37,12 @@ export const ThemeToggle = React.forwardRef<
       className={cn(
         "relative flex items-center w-[72px] h-[32px] rounded-full p-[1px] transition-colors duration-200",
         isDark
-          ? "bg-[#2D1817] ring-1 ring-inset ring-[#A55B3766]"
-          : "bg-[#C8B8B6] ring-1 ring-inset ring-[#D2B48C]",
+          ? "bg-[var(--nocturne-detail)] ring-1 ring-inset ring-[var(--nocturne-surface-40)]"
+          : "bg-[var(--neutral-200)] ring-1 ring-inset ring-[var(--sonata-detail)]",
         className,
       )}
-      aria-label="Toggle Theme"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={isDark}
       {...props}
     >
       <div className="absolute inset-x-0 mx-auto flex w-full justify-between items-center px-[2px]">
@@ -49,13 +50,13 @@ export const ThemeToggle = React.forwardRef<
         <div
           className={cn(
             "flex items-center justify-center w-[28px] h-[28px] rounded-full transition-colors duration-200 z-10",
-            !isDark ? "bg-[#FFB300]" : "bg-transparent",
+            !isDark ? "bg-[var(--hf-accent)]" : "bg-transparent",
           )}
         >
           <Sun
             className={cn(
               "w-4 h-4 transition-colors duration-200",
-              !isDark ? "text-[#2D1817]" : "text-[#A55B3766]",
+              !isDark ? "text-[var(--text-on-light)]" : "text-[var(--nocturne-surface-40)]",
             )}
             strokeWidth={2}
           />
@@ -65,13 +66,13 @@ export const ThemeToggle = React.forwardRef<
         <div
           className={cn(
             "flex items-center justify-center w-[28px] h-[28px] rounded-full transition-colors duration-200 z-10",
-            isDark ? "bg-[#FFB300]" : "bg-transparent",
+            isDark ? "bg-[var(--hf-accent)]" : "bg-transparent",
           )}
         >
           <Moon
             className={cn(
               "w-4 h-4 transition-colors duration-200",
-              isDark ? "text-[#1A1110]" : "text-[#4A3B39]",
+              isDark ? "text-[var(--neutral-900)]" : "text-[var(--neutral-700)]",
             )}
             strokeWidth={2}
           />

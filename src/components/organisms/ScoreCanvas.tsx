@@ -1,92 +1,137 @@
+"use client";
+
 import React from "react";
 import { Music, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SandboxContextMenu } from "./SandboxContextMenu";
 import { useSandboxStore } from "@/store/useSandboxStore";
+import { useScoreStore } from "@/store/useScoreStore";
+import type { NoteData } from "@/store/useScoreStore";
 
 export interface ScoreCanvasProps extends React.HTMLAttributes<HTMLDivElement> {
   staveLabels?: [string, string, string, string];
   showViolations?: boolean;
+  /** Piece name from useUploadStore — populates aria-label dynamically */
+  pieceName?: string;
 }
 
 /**
  * ScoreCanvas Organism
- * Pencil Node: fsxhw ("ScoreCanvas") — fill_container × 632px inside MainArea.
+ * Pencil Node: fsxhw ("ScoreCanvas") — fills MainArea, 632px tall.
  *
- * Spec (all absolute pixel coords, canvas 1060×632, score area ~1060px wide):
- *   fill: $neutral-50
- *   layout: none (absolute positioning)
+ * Renders four SATB staves via VexFlow 5 SVG backend inside a useEffect.
+ * VexFlow is dynamically imported (client-only) per ADR-009.
+ * A ResizeObserver re-renders staves whenever the container width changes.
  *
- *   Staves (x:80 from left edge):
- *     SopranoStave: x:80  y:40   w:980  h:37  layout:vertical gap:8  (5 lines, 1px each)
- *     AltoStave:    x:80  y:105  w:980  h:37
- *     TenorStave:   x:80  y:186  w:980  h:37  (4 lines per design)
- *     BassStave:    x:80  y:251  w:980  h:37  (5 lines)
+ * Voice labels (S/A/T/B) are rendered as a separate SVG overlay so they
+ * sit at a fixed left offset regardless of VexFlow's internal layout.
  *
- *   Labels: x:60 — Instrument Serif fs:16 fill:#7A6050
- *     S at y:50, A at y:115, T at y:196, B at y:261
- *
- *   SystemBrace: x:76 y:40 w:4 h:252 fill:$neutral-500 r:2
- *   OpenBarline: x:80 y:40 w:2 h:255 fill:$neutral-700
- *   Barline1:    x:340 y:40 w:1 h:255
- *   Barline2:    x:600 y:40 w:1 h:255
- *
- *   Notes (ellipse 12×9):
- *     Blue group (x:120):  S y:48, A y:113, T y:194, B y:259
- *     Amber group (x:200): S y:52, A y:117, T y:198, B y:263
- *     Default (x:280):     S y:44, A y:109, T y:190, B y:255
- *     Stems (1px wide, h:28): SStem1 x:131 y:22, SStem2 x:211 y:26, SStem3 x:291 y:18
- *
- *   Highlights (w:20 h:230, r:2, with stroke):
- *     BlueNoteHL:   x:116 y:36  fill:#1976D21A  stroke:#1976D2 @1
- *     OrangeNoteHL: x:196 y:36  fill:#FFB3001A  stroke:#FFB300 @1
- *
- *   ViolationOverlay: x:188 y:36 w:56 h:230  fill:$semantic-violation/10  stroke:$semantic-violation @1
- *
- *   Badges (24×24 circle r:12):
- *     ViolBadge:  x:220 y:24  fill:$semantic-violation  icon:triangle-alert 12×12 white
- *     BlueBadge:  x:114 y:24  fill:#1976D2              icon:music 12×12 white
- *     AmberBadge: x:190 y:24  fill:#FFB300              icon:music 12×12 white
+ * Violation overlays and badges remain as design placeholders until TASK-A24
+ * wires them to the backend violation JSON + VexFlow coordinate mapping.
  */
+
+// Vertical top-line position of each stave within the container (px)
+const STAVE_Y_OFFSETS = [40, 120, 200, 280] as const;
+
+// Horizontal offset: leaves space for system brace + voice labels
+const STAVE_X = 80;
+
+// Clef per SATB voice: Soprano/Alto = treble, Tenor = tenor (C clef), Bass = bass
+const STAVE_CLEFS = ["treble", "treble", "tenor", "bass"] as const;
+
+
 export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
   (
     {
       staveLabels = ["S", "A", "T", "B"],
       showViolations = false,
+      pieceName,
       className,
       ...props
     },
     ref,
   ) => {
     const { openContextMenu } = useSandboxStore();
+    const notes = useScoreStore((s) => s.notes);
+    const vfContainerRef = React.useRef<HTMLDivElement>(null);
 
-    // Stave definitions matching Pencil absolute coords
-    const staves = [
-      { y: 40, lines: 5, label: staveLabels[0], labelY: 50 },
-      { y: 105, lines: 5, label: staveLabels[1], labelY: 115 },
-      { y: 186, lines: 4, label: staveLabels[2], labelY: 196 },
-      { y: 251, lines: 5, label: staveLabels[3], labelY: 261 },
-    ];
+    React.useEffect(() => {
+      const containerEl = vfContainerRef.current;
+      if (!containerEl) return;
 
-    // Notes: [x, y, color]
-    const blueNotes: [number, number][] = [
-      [120, 48],
-      [120, 113],
-      [120, 194],
-      [120, 259],
-    ];
-    const amberNotes: [number, number][] = [
-      [200, 52],
-      [200, 117],
-      [200, 198],
-      [200, 263],
-    ];
-    const defaultNotes: [number, number][] = [
-      [280, 44],
-      [280, 109],
-      [280, 190],
-      [280, 255],
-    ];
+      let rafId: number;
+
+      const renderScore = () => {
+        // Dynamic import per ADR-009: guarantees client-only execution, SSR-safe
+        import("vexflow").then(({ Renderer, Stave, StaveConnector, StaveNote, Formatter }) => {
+          // Clear previous VexFlow SVG before re-rendering
+          containerEl.innerHTML = "";
+
+          const containerWidth = containerEl.clientWidth;
+          const containerHeight = containerEl.clientHeight;
+          if (containerWidth === 0) return;
+
+          // Stave width fills container minus left offset + right margin
+          const staveWidth = containerWidth - STAVE_X - 20;
+
+          // Minimum height: bottom of last stave (280) + stave body (40) + padding (40)
+          const renderHeight = Math.max(containerHeight, 380);
+
+          const renderer = new Renderer(containerEl, Renderer.Backends.SVG);
+          renderer.resize(containerWidth, renderHeight);
+          const ctx = renderer.getContext();
+
+          // Propagate Nocturne/Sonata theme tokens to VexFlow SVG paths
+          ctx.setStrokeStyle("var(--hf-text-primary)");
+          ctx.setFillStyle("var(--hf-text-primary)");
+
+          // Render four SATB staves, adding clef + time signature to the first
+          const staveRefs = STAVE_Y_OFFSETS.map((y, i) => {
+            const stave = new Stave(STAVE_X, y, staveWidth);
+            stave.addClef(STAVE_CLEFS[i]);
+            if (i === 0) stave.addTimeSignature("4/4");
+            stave.setContext(ctx).draw();
+            return stave;
+          });
+
+          // System brace spanning all four staves
+          const brace = new StaveConnector(staveRefs[0], staveRefs[3]);
+          brace.setType(StaveConnector.type.BRACE);
+          brace.setContext(ctx).draw();
+
+          // Opening barline connecting top and bottom staves
+          const openBarline = new StaveConnector(staveRefs[0], staveRefs[3]);
+          openBarline.setType(StaveConnector.type.SINGLE_LEFT);
+          openBarline.setContext(ctx).draw();
+
+          // Render notes from ScoreState store — grouped by staveIndex.
+          // Formatter.FormatAndDraw handles Voice creation, joining, and horizontal placement.
+          staveRefs.forEach((stave, staveIndex) => {
+            const staveNotes = notes.filter((n: NoteData) => n.staveIndex === staveIndex);
+            if (staveNotes.length === 0) return;
+            const vfNotes = staveNotes.map(
+              (n: NoteData) =>
+                new StaveNote({ keys: [n.key], duration: n.duration, clef: n.clef }),
+            );
+            Formatter.FormatAndDraw(ctx, stave, vfNotes);
+          });
+        });
+      };
+
+      const onResize = () => {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(renderScore);
+      };
+
+      const observer = new ResizeObserver(onResize);
+      observer.observe(containerEl);
+      renderScore();
+
+      return () => {
+        observer.disconnect();
+        cancelAnimationFrame(rafId);
+      };
+    }, [notes]);
 
     return (
       <div
@@ -96,7 +141,11 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
           className,
         )}
         role="img"
-        aria-label="Score canvas — SATB grand staff"
+        aria-label={
+          pieceName
+            ? `SATB score: ${pieceName}`
+            : "Score canvas — SATB grand staff"
+        }
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -104,203 +153,90 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
         }}
         {...props}
       >
+        {/* VexFlow SVG render target — dynamic import writes into this div */}
+        <div
+          ref={vfContainerRef}
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+        />
+
+        {/* Voice labels: S / A / T / B — positioned left of STAVE_X */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none"
           aria-hidden="true"
         >
-          {/* ── Stave lines ───────────────────────────────── */}
-          {staves.map((stave, si) => {
-            const lineSpacing = 8; // gap:8 between lines
-            return (
-              <g key={si}>
-                {Array.from({ length: stave.lines }, (_, li) => (
-                  <line
-                    key={li}
-                    x1={80}
-                    x2={80 + 980}
-                    y1={stave.y + li * lineSpacing}
-                    y2={stave.y + li * lineSpacing}
-                    strokeWidth={1}
-                    style={{ stroke: "var(--hf-staff-line)" }}
-                  />
-                ))}
-              </g>
-            );
-          })}
-
-          {/* ── Voice labels — Instrument Serif fs:16 ─────── */}
-          {staves.map((stave, si) => (
+          {STAVE_Y_OFFSETS.map((y, i) => (
             <text
-              key={si}
-              x={60}
-              y={stave.labelY}
+              key={staveLabels[i]}
+              x={STAVE_X - 20}
+              y={y + 10}
               textAnchor="middle"
               fontSize={16}
               fontFamily="'Instrument Serif', serif"
               style={{ fill: "var(--hf-text-secondary)" }}
             >
-              {stave.label}
+              {staveLabels[i]}
             </text>
-          ))}
-
-          {/* ── System Brace: x:76 y:40 w:4 h:252 r:2 ──── */}
-          <rect
-            x={76}
-            y={40}
-            width={4}
-            height={252}
-            rx={2}
-            style={{ fill: "var(--hf-staff-line)" }}
-          />
-
-          {/* ── Open barline: x:80 y:40 w:2 h:255 ────────── */}
-          <rect
-            x={80}
-            y={40}
-            width={2}
-            height={255}
-            style={{ fill: "var(--hf-detail)" }}
-          />
-
-          {/* ── Barline 1: x:340 ──────────────────────────── */}
-          <rect
-            x={340}
-            y={40}
-            width={1}
-            height={255}
-            style={{ fill: "var(--hf-detail)" }}
-          />
-
-          {/* ── Barline 2: x:600 ──────────────────────────── */}
-          <rect
-            x={600}
-            y={40}
-            width={1}
-            height={255}
-            style={{ fill: "var(--hf-detail)" }}
-          />
-
-          {/* Highlight overlays (drawn before notes so notes are on top) ── */}
-          {showViolations && (
-            <>
-              {/* BlueNoteHL: x:116 y:36 w:20 h:230 fill:#1976D21A stroke:#1976D2 r:2 */}
-              <rect
-                x={116}
-                y={36}
-                width={20}
-                height={230}
-                rx={2}
-                fill="#1976D21A"
-                stroke="#1976D2"
-                strokeWidth={1}
-              />
-
-              {/* OrangeNoteHL: x:196 y:36 w:20 h:230 fill:#FFB3001A stroke:#FFB300 r:2 */}
-              <rect
-                x={196}
-                y={36}
-                width={20}
-                height={230}
-                rx={2}
-                fill="#FFB3001A"
-                stroke="#FFB300"
-                strokeWidth={1}
-              />
-            </>
-          )}
-
-          {/* ViolationOverlay: x:188 y:36 w:56 h:230 fill:violation/10 stroke:violation */}
-          {showViolations && (
-            <rect
-              x={188}
-              y={36}
-              width={56}
-              height={230}
-              style={{
-                fill: "var(--semantic-violation-10)",
-                stroke: "var(--semantic-violation)",
-              }}
-              strokeWidth={1}
-            />
-          )}
-
-          {/* ── Stems ─────────────────────────────────────── */}
-          <rect
-            x={131}
-            y={22}
-            width={1}
-            height={28}
-            style={{
-              fill: showViolations ? "#1976D2" : "var(--hf-text-primary)",
-            }}
-          />
-          <rect
-            x={211}
-            y={26}
-            width={1}
-            height={28}
-            style={{
-              fill: showViolations ? "#FFB300" : "var(--hf-text-primary)",
-            }}
-          />
-          <rect
-            x={291}
-            y={18}
-            width={1}
-            height={28}
-            style={{ fill: "var(--hf-text-primary)" }}
-          />
-
-          {/* ── Blue notes ────────────────────────────────── */}
-          {blueNotes.map(([x, y], i) => (
-            <ellipse
-              key={i}
-              cx={x}
-              cy={y}
-              rx={6}
-              ry={4.5}
-              style={{
-                fill: showViolations ? "#1976D2" : "var(--hf-text-primary)",
-              }}
-            />
-          ))}
-
-          {/* ── Amber notes ───────────────────────────────── */}
-          {amberNotes.map(([x, y], i) => (
-            <ellipse
-              key={i}
-              cx={x}
-              cy={y}
-              rx={6}
-              ry={4.5}
-              style={{
-                fill: showViolations ? "#FFB300" : "var(--hf-text-primary)",
-              }}
-            />
-          ))}
-
-          {/* ── Default notes ─────────────────────────────── */}
-          {defaultNotes.map(([x, y], i) => (
-            <ellipse
-              key={i}
-              cx={x}
-              cy={y}
-              rx={6}
-              ry={4.5}
-              style={{ fill: "var(--hf-text-primary)" }}
-            />
           ))}
         </svg>
 
-        {/* ── Badges (HTML overlays for easier pointer-events) ──
-            All 24×24 with r:12 (full circle)                    */}
-
+        {/* ── Violation overlays ─────────────────────────────────────────
+            Design placeholders — coordinates will be computed from VexFlow
+            note positions by RedLineTooltip in TASK-A24.
+            Colors below are semantic tokens; ad-hoc hex values are deferred
+            to the full RedLineTooltip implementation.                      */}
         {showViolations && (
           <>
-            {/* BlueBadge: x:114 y:24 fill:#1976D2 */}
+            {/* BlueNoteHL: x:116 y:36 w:20 h:230 */}
+            <div
+              className="absolute rounded-[2px]"
+              style={{
+                left: 116,
+                top: 36,
+                width: 20,
+                height: 230,
+                backgroundColor: "var(--semantic-warning-10)",
+                border: "1px solid var(--semantic-warning)",
+              }}
+              aria-hidden="true"
+            />
+
+            {/* OrangeNoteHL: x:196 y:36 w:20 h:230 */}
+            <div
+              className="absolute rounded-[2px]"
+              style={{
+                left: 196,
+                top: 36,
+                width: 20,
+                height: 230,
+                backgroundColor: "var(--sonata-accent-10)",
+                border: "1px solid var(--hf-accent)",
+              }}
+              aria-hidden="true"
+            />
+
+            {/* ViolationOverlay: x:188 y:36 w:56 h:230 */}
+            <div
+              className="absolute rounded-[2px]"
+              style={{
+                left: 188,
+                top: 36,
+                width: 56,
+                height: 230,
+                backgroundColor: "var(--semantic-violation-10)",
+                border: "1px solid var(--semantic-violation)",
+              }}
+              aria-hidden="true"
+            />
+
+            {/* BlueBadge: x:114 y:24 */}
             <div
               className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
-              style={{ left: 114, top: 24, backgroundColor: "#1976D2" }}
+              style={{
+                left: 114,
+                top: 24,
+                backgroundColor: "var(--semantic-warning)",
+              }}
               aria-label="Blue note group"
               role="img"
             >
@@ -311,10 +247,14 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
               />
             </div>
 
-            {/* AmberBadge: x:190 y:24 fill:#FFB300 */}
+            {/* AmberBadge: x:190 y:24 */}
             <div
               className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
-              style={{ left: 190, top: 24, backgroundColor: "#FFB300" }}
+              style={{
+                left: 190,
+                top: 24,
+                backgroundColor: "var(--hf-accent)",
+              }}
               aria-label="Amber note group"
               role="img"
             >
@@ -324,35 +264,26 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
                 aria-hidden="true"
               />
             </div>
+
+            {/* ViolBadge: x:220 y:24 */}
+            <div
+              className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
+              style={{
+                left: 220,
+                top: 24,
+                backgroundColor: "var(--semantic-violation)",
+              }}
+              aria-label="Voice-leading violation"
+              role="img"
+            >
+              <TriangleAlert
+                className="w-[12px] h-[12px] text-white"
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </div>
           </>
         )}
-
-        {/* ViolBadge: x:220 y:24 fill:$semantic-violation */}
-        {showViolations && (
-          <div
-            className="absolute flex items-center justify-center w-[24px] h-[24px] rounded-full"
-            style={{
-              left: 220,
-              top: 24,
-              backgroundColor: "var(--semantic-violation)",
-            }}
-            aria-label="Voice-leading violation"
-            role="img"
-          >
-            <TriangleAlert
-              className="w-[12px] h-[12px] text-white"
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-          </div>
-        )}
-
-        {/* VexFlow live render target */}
-        <div
-          id="score-vexflow-root"
-          className="absolute inset-0 pointer-events-auto"
-          aria-hidden="true"
-        />
 
         <SandboxContextMenu />
       </div>

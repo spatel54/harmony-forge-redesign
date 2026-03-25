@@ -1,0 +1,564 @@
+# Prompting Guide — HarmonyForge Context Engineering Workflow
+
+*Step-by-step prompts for your current project stage, when to use the loop vs. chat normally, and practical tips.*
+
+*Last updated: 2026-03-10 — incorporating Notebook 2 (28a3882c) context engineering methodology.*
+
+---
+
+## Where You Are Right Now
+
+| Phase | Status | What It Means |
+|---|---|---|
+| Phase 1 (Tokens, fonts, globals.css) | Done | Design system tokens are live |
+| Phase 2 (React components, VexFlow, Tone.js) | Ready to plan | No components built yet; specs written |
+| Phase 3 (Theory tags, metadata) | Not started | Blocked on Phase 2 |
+| Phase 4 (Hover/selected states, audit) | Not started | Blocked on Phase 3 |
+
+**Your next immediate action:** Run the planner to turn `specs/001-satb-sandbox.md` into a concrete `IMPLEMENTATION_PLAN.md` task list. Then run the loop on a feature branch.
+
+---
+
+## Core Principle — Context Is the Only Lever
+
+LLMs are stateless functions. The only lever to control code quality is the context window.
+
+- **Usable context:** While models advertise 200K+ tokens, only ~176K are truly usable.
+- **Smart zone:** Optimal context utilization is **40%–60%**. Below 40% is safe but slow. Above 60% risks "lost in the middle" degradation (Liu et al., 2023).
+- **Worst enemies of the context window:** incorrect information, missing information, and noise (raw logs, large JSON blobs, search output).
+
+The entire workflow below — FIC, the loop, compaction prompts — exists to keep the context window in the smart zone.
+
+---
+
+## The Decision: Loop vs. Normal Chat
+
+Use this flowchart before every work session.
+
+```
+Do you know exactly what to build? (spec exists, ACs are written)
+├── YES → Is it more than ~4 subtasks?
+│         ├── YES → Use the loop (Gear 3)
+│         └── NO  → Use normal chat (interactive session)
+└── NO  → Do you need to explore/decide first?
+          ├── YES → Use normal chat to spec + plan (Gear 1 + 2)
+          └── NO  → You're blocked — ask a clarifying question first
+```
+
+**Use the loop when:**
+
+- You have a reviewed `IMPLEMENTATION_PLAN.md` with specific tasks
+- You're implementing features that don't need your judgment per-commit
+- You want unattended overnight progress on a clean feature branch
+
+**Use normal chat when:**
+
+- Writing a spec (observable outcomes, not implementation)
+- Debugging a broken component surgically
+- Making an architectural decision that needs an ADR
+- One-off changes that are faster done interactively (< 3 subtasks)
+- Anything where the acceptance criterion is "Superman approves this"
+
+---
+
+## The "Ralph Wiggum" Loop Mechanism
+
+The loop is not primarily about automation — it is about **guaranteed fresh context per task**. Each iteration:
+
+1. Reads `IMPLEMENTATION_PLAN.md` and picks exactly one uncompleted task
+2. Implements it
+3. Runs backpressure (`npx tsc --noEmit` + `npm run build`)
+4. Commits (with an ADR if the task warrants one)
+5. Exits — the bash script immediately restarts, giving the AI a completely fresh, unpolluted context window for the next task
+
+**Shared state between isolated iterations lives only in `IMPLEMENTATION_PLAN.md` and `CONTEXT.md` files.** Never accumulate state in the conversation itself across loop tasks.
+
+> **AGENTS.md is the operational heart of the loop.** It is not a rule file — it is the canonical guide wiring in the exact build, test, and typecheck commands the AI uses to self-evaluate its work. If the loop keeps making the same mistake, `AGENTS.md` is missing a constraint. Add it immediately.
+
+### Sandboxing Requirement
+
+`loop.sh` uses `--dangerously-skip-permissions` to bypass Claude's permission prompts. This means the AI will not ask for approval on any tool call.
+
+**Risk:** Running this without a sandbox exposes SSH keys, browser cookies, and access tokens on your machine.
+
+**Rule:** Always run the loop inside a Docker container or isolated sandbox. Provide only minimum viable access: required API/deploy keys only, no private data, restricted network where possible.
+
+---
+
+## Prompts by Stage
+
+### Stage 0 — Before You Do Anything
+
+Check where you stand. Paste this into any Claude session:
+
+```
+Read IMPLEMENTATION_PLAN.md and specs/001-satb-sandbox.md.
+Tell me: (1) which tasks are done, (2) which tasks are next,
+(3) whether the spec covers the next phase. Do not write any code.
+```
+
+---
+
+### Stage 1 — Gear 2: Run the Planner (Do This Now)
+
+You have a spec. You need a task list. Run this in a terminal, not a chat:
+
+```bash
+cat PROMPT_plan.md | claude -p
+```
+
+The planner will:
+
+1. Read `specs/001-satb-sandbox.md` against `src/`
+2. Ask you clarifying questions (via `AskUserQuestionTool` — answer all four dimensions: JTBD, edge cases, vague ACs, scope)
+3. Write `IMPLEMENTATION_PLAN.md` with ordered, scoped tasks and explicit test derivations
+
+**After it finishes:** Read the task list carefully. Edit it if anything is wrong. Do not run the loop until you've reviewed it.
+
+**The plan is disposable.** If the AI hallucinates a plan that doesn't match the codebase, delete `IMPLEMENTATION_PLAN.md` and regenerate. Never patch a hallucinated plan.
+
+If you want to run it inside a chat session instead:
+
+```
+Read PROMPT_plan.md and follow its instructions exactly.
+The spec is specs/001-satb-sandbox.md.
+Do not write any code — only produce IMPLEMENTATION_PLAN.md.
+```
+
+---
+
+### Stage 2 — Gear 3: Run the Loop
+
+Once `IMPLEMENTATION_PLAN.md` is reviewed and you're on a feature branch:
+
+```bash
+git checkout -b feature/phase-2-components
+bash loop.sh
+```
+
+The loop runs until you stop it with `Ctrl+C`. Each iteration:
+
+1. Picks the top uncompleted task
+2. Implements it
+3. Runs `npx tsc --noEmit` + `npm run build` (backpressure)
+4. Commits with an ADR if needed
+5. Exits — restarts immediately for the next task
+
+**You do not touch anything while the loop runs.**
+
+Check progress at any time without interrupting:
+
+```bash
+git log --oneline
+```
+
+---
+
+### Stage 3 — Review the Loop Output
+
+After the loop stops (or you stop it), review everything:
+
+```bash
+# See what was committed
+git log --oneline
+
+# See any new ADRs written
+ls docs/adr/
+
+# Read a specific diff
+git show <commit-hash>
+
+# Check the spec for what's still open
+cat specs/001-satb-sandbox.md
+```
+
+In a chat session, you can also ask:
+
+```
+Read git log --oneline output below and docs/adr/overview.md.
+Tell me what was built, what ADRs were added, and what tasks remain in IMPLEMENTATION_PLAN.md.
+[paste git log output here]
+```
+
+---
+
+### Stage 4 — Correct a Wrong Commit
+
+If the loop committed something wrong:
+
+1. Do **not** revert and manually patch
+1. Stop the loop
+1. Add a correction task to `IMPLEMENTATION_PLAN.md`:
+
+```markdown
+## Task N+1: Correct [what was wrong]
+- Description: [previous task] produced [wrong behavior]. Fix by [correct approach].
+- Acceptance: [observable test that proves the fix]
+- AC source: specs/001-satb-sandbox.md > AC-00X
+```
+
+1. Restart the loop. It will fix it on the next iteration.
+
+---
+
+### Stage 5 — Write a New Spec (Start of Next Phase)
+
+When Phase 2 is done and you're starting Phase 3, write a new spec in normal chat:
+
+```
+I need to write specs/002-theory-tags.md for Phase 3.
+The user job: a composer opens the score and sees Theory-Named tags
+(Strophic, Homophonic, SATB, Common Meter, Hymnody) rendered beneath
+the score title with academically rigorous definitions sourced from backend JSON.
+
+Help me write observable, testable acceptance criteria for this feature.
+Do not write any code. Format: same structure as specs/001-satb-sandbox.md.
+```
+
+---
+
+### Stage 6 — Write an ADR (Architecture Decision)
+
+When you're about to make a significant architectural choice, write an ADR first:
+
+```
+I need to write an ADR for [the decision].
+The options I'm considering are: [option A] vs [option B].
+Use the template at docs/adr/template.md.
+My HarmonyForge stack is: Next.js App Router, TypeScript strict,
+Tailwind CSS (Nocturne/Sonata tokens only), VexFlow, Tone.js, Zustand.
+Fill it out completely — no placeholders. Status: Accepted.
+```
+
+**ADR naming convention:** `ADR-NNN-present-tense-imperative-verb-phrase.md`
+Examples: `ADR-012-adopt-postgres.md`, `ADR-003-choose-vexflow-renderer.md`
+
+**ADRs are immutable once accepted.** To change a decision, write a new superseding ADR — never edit the rationale or consequences of an accepted ADR.
+
+---
+
+### Stage 7 — Surgically Fix a Broken Component (Interactive)
+
+For bugs or one-off fixes that don't need the loop:
+
+```
+Read src/components/[ComponentName].tsx.
+[Describe the bug or constraint violation].
+Follow the HCI protocol: preview first, wait for my approval, then execute.
+```
+
+The HCI protocol requires you to reply `Yes`, `Proceed`, or `Approved` before Claude writes any code.
+
+---
+
+### Stage 8 — CONTEXT.md Maintenance
+
+After any session — loop iteration or interactive — update the `CONTEXT.md` in every directory you touched:
+
+1. Identify which directories had files created or modified.
+2. Open the `CONTEXT.md` in each affected directory.
+3. Update the relevant section (Decisions, Patterns, Files, or a new entry).
+4. If no `CONTEXT.md` exists for that directory yet, create one modelled on the nearest parent.
+
+To auto-populate from all unprocessed SpecStory sessions, run:
+
+```bash
+bash scripts/specstory-to-context.sh
+```
+
+This script reads `.specstory/history/`, uses `claude -p` to extract decisions and file changes from each new session, and appends them to the relevant `CONTEXT.md` files. It is idempotent — re-running never duplicates entries.
+
+Run it at the **start of every new session** to ensure last session's learnings are live in context before the next task begins.
+
+---
+
+## Power Prompts
+
+These prompts have precise effects and should be used verbatim.
+
+### The Compaction Prompt
+
+Run this mid-session when the context gets noisy (logs, JSON blobs, grep output accumulate):
+
+```
+Write everything we did so far to progress.md, ensure to note the end goal,
+the approach we're taking, the steps we've done so far, and the current
+failure we're working on.
+```
+
+Then `/compact`. The next session reads `progress.md` instead of a degraded conversation history.
+
+---
+
+### The Fitness Function Prompt
+
+Run this after implementing a feature to verify architectural alignment with your ADRs:
+
+```
+IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning.
+IMPORTANT: Turn on extended thinking. Turn on expert advice. Turn on search.
+This is a fitness function to evaluate if our work is using all our decisions,
+and is correct and accurate.
+- Our decisions are here: [url to docs/adr/]
+- Our work to evaluate is here: [url or file path]
+Explain any errors, problems, gaps, weaknesses. Be direct. Be decisive.
+```
+
+---
+
+### The JTBD Requirements Prompt
+
+During spec writing, use this to elicit structured requirements before acceptance criteria:
+
+```
+Read AUDIENCE_JTBD.md (if it exists) and specs/[current spec].md.
+Using the AskUserQuestionTool, interview me to clarify:
+(1) the audience's Jobs To Be Done, (2) the activities (verbs in the journey),
+(3) edge cases and failure states, (4) scope boundaries for the next SLC release.
+Do not write any code or spec text — only ask questions.
+```
+
+**SLC vs. MVP:** Group JTBD activities into Simple, Lovable, Complete slices rather than minimum viable products. SLC = narrow scope you can ship fast, fully accomplishes a job within that scope, and is delightful within its boundaries.
+
+---
+
+## Practical Tips
+
+### Tip 1 — The Loop Is Not Magic; the Spec Is
+
+The loop executes exactly what the spec defines. If your spec is vague, the loop produces vague code. Time spent sharpening acceptance criteria (`[ ]` checkboxes) saves 10x the time debugging loop output.
+
+**Bad AC:** "The score canvas should look correct."
+
+**Good AC:** "VexFlow renders all four SATB voices at distinct y-positions with no overlapping noteheads. `role=\"img\"` and `aria-label` are present on the canvas wrapper."
+
+---
+
+### Tip 2 — Never Run the Loop on `main`
+
+`loop.sh` exits with an error if you're on `main` or `master`. This is intentional. Always:
+
+```bash
+git checkout -b feature/[phase-name]
+```
+
+---
+
+### Tip 3 — When to Chat vs. When to Loop (Quick Reference)
+
+| Task | Use |
+|---|---|
+| Debugging a specific component | Normal chat |
+| Exploring what exists in the codebase | Normal chat |
+| Writing a spec | Normal chat |
+| Running the planner | Terminal or normal chat |
+| Implementing 1–2 small things quickly | Normal chat |
+| Implementing a full phase (10+ tasks) | Loop |
+| Making an architectural decision | Normal chat → write ADR |
+| Reviewing loop output | Normal chat or `git log` |
+| Adding an urgent correction mid-phase | Stop loop → update plan → restart loop |
+| Evaluating architectural alignment | Fitness Function Prompt (chat) |
+| Context getting noisy mid-session | Compaction Prompt → `/compact` |
+
+---
+
+### Tip 4 — Keep `AGENTS.md` Current
+
+`AGENTS.md` is the operational heart of the loop — not a progress diary. It contains:
+
+- Exact build, test, and typecheck commands the AI uses for backpressure
+- Operational learnings the AI needs to self-evaluate its work
+
+If the loop keeps making the same mistake, `AGENTS.md` is missing a rule. Add it immediately:
+
+```
+Read AGENTS.md. Add the following rule under the appropriate section:
+"[specific constraint the agent keeps violating]."
+Do not change anything else.
+```
+
+---
+
+### Tip 5 — Use Normal Chat for ADRs After Decisions
+
+Every significant architectural choice you make interactively should become an ADR immediately — before you forget the reasoning:
+
+```
+We just decided [X] instead of [Y] because [Z].
+Write ADR-00N for this decision using docs/adr/template.md.
+Status: Accepted. Date: [today].
+Update docs/adr/overview.md to add the new entry.
+```
+
+Claude can auto-propose an ADR draft after implementing a feature. You review and approve before it's committed. A draft is not binding.
+
+---
+
+### Tip 6 — How to Update an ADR
+
+**Never edit an accepted ADR's rationale, options, or consequences.**
+
+To change a decision:
+
+```
+ADR-00N is now outdated because [reason].
+Write a new ADR-00M that supersedes it.
+In the new ADR, add "Supersedes ADR-00N" to the header.
+In ADR-00N, change the status line to "Superseded by ADR-00M."
+That is the only edit allowed in ADR-00N.
+```
+
+---
+
+### Tip 7 — What "Done" Actually Means
+
+A task is done when:
+
+1. `npx tsc --noEmit` passes (no type errors)
+2. `npm run build` passes (no compilation errors)
+3. The acceptance criteria checkboxes in `specs/*.md` are provably satisfied
+
+For subjective ACs (visual layout, UX tone, creative quality), use the LLM-as-a-Judge backpressure at `src/lib/llm-review.ts`. This fixture exposes a binary pass/fail API that the loop can invoke to self-evaluate screenshots or text output against aesthetic criteria — without requiring a human checkpoint.
+
+If you're not sure whether something is done, check the spec — not your memory of the conversation.
+
+---
+
+### Tip 8 — The Loop Stops at a Broken Build. That Is Correct
+
+If the loop stops with a build error, it worked as designed. The loop will not commit broken code.
+
+To resume after a build failure:
+
+1. Read the error (`npx tsc --noEmit`)
+2. Fix it in normal chat (interactively, small scope)
+3. Restart the loop
+
+---
+
+### Tip 9 — Treat CONTEXT.md as Living Documentation
+
+A CONTEXT.md that hasn't been updated in a week is stale context. Every future agent inherits it uncritically. A wrong assumption from a stale CONTEXT.md propagates through every loop iteration that follows.
+
+Run `bash scripts/specstory-to-context.sh` at the start of any new session to ensure all session learnings from `.specstory/history/` have been distilled into the relevant CONTEXT.md files before the next task begins. The script processes only unprocessed sessions, so it is fast on subsequent runs.
+
+---
+
+### Tip 10 — Subagents as Memory Extensions
+
+When a task requires broad codebase exploration (Glob, Grep, Read calls across many files), delegate it to a subagent rather than doing it in the main context. Each subagent gets its own context window that is garbage collected — only the clean summary returns to the parent agent.
+
+This keeps the main context window in the smart zone while still getting full research fidelity.
+
+---
+
+### Tip 11 — Apply the Complexity Budget Before Adding Abstractions
+
+AI changes the economics of abstractions. Before introducing a new CMS, config system, or deep dependency tree, ask:
+
+> "Could we spend tokens to manage this as raw Markdown files instead?"
+
+If yes, prefer the raw approach. Delete abstractions that cost more to maintain than they save. The AI can regenerate boilerplate; it cannot undo a tangled dependency tree.
+
+---
+
+## Copy-Paste Quick Reference
+
+### Check current state
+
+```
+Read IMPLEMENTATION_PLAN.md. What tasks are done, in progress, and remaining?
+```
+
+### Start the planner
+
+```bash
+cat PROMPT_plan.md | claude -p
+```
+
+### Start the loop on a feature branch
+
+```bash
+git checkout -b feature/phase-2
+bash loop.sh
+```
+
+### Check loop progress
+
+```bash
+git log --oneline
+```
+
+### Compact a noisy session
+
+```
+Write everything we did so far to progress.md, ensure to note the end goal,
+the approach we're taking, the steps we've done so far, and the current
+failure we're working on.
+```
+
+Then `/compact`.
+
+### Add a correction task
+
+```
+Add this task to IMPLEMENTATION_PLAN.md after the current task:
+"Task N: Correct [issue]. [Description of correct behavior.] AC: [testable criterion]."
+```
+
+### Write a new spec
+
+```
+Help me write specs/00N-[feature].md using the same structure as specs/001-satb-sandbox.md.
+Focus on observable user outcomes and testable acceptance criteria only. No implementation details.
+```
+
+### Write an ADR
+
+```
+Write ADR-00N for this decision using docs/adr/template.md.
+Decision: [X]. Options considered: [A, B, C]. Chosen: [X]. Status: Accepted.
+Update docs/adr/overview.md to include the new entry.
+```
+
+### Run the fitness function
+
+```
+IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning.
+IMPORTANT: Turn on extended thinking. Turn on expert advice. Turn on search.
+This is a fitness function to evaluate if our work is using all our decisions,
+and is correct and accurate.
+- Our decisions are here: [url to docs/adr/]
+- Our work to evaluate is here: [url or file path]
+Explain any errors, problems, gaps, weaknesses. Be direct. Be decisive.
+```
+
+### Fix a constraint violation interactively
+
+```
+Read [file path]. The constraint violation is [describe it].
+Preview the fix (HCI protocol). Wait for my approval before executing.
+```
+
+---
+
+## Specialist Summoning (Antigravity Skills)
+
+HarmonyForge is powered by a "Cognitive Engine" of ~1,000 specialists. Use these to force the agent into high-context, academically rigorous modes.
+
+### 1. How to Summon
+
+In any prompt, tag the specialist and point the agent to their library:
+`"Using @vexflow-expert from references/antigravity-awesome-skills/skills/, update the score renderer..."`
+
+### 2. When to Use Specialists
+
+- **Accessibility**: Use `@wcag-audit-patterns` for any new UI component.
+- **Music Logic**: Use `@vexflow-expert` or `@theory-named-strategy` for score work.
+- **Aesthetics**: Use `@ui-ux-pro-max` to ensure we don't build "generic" React components.
+
+### 3. Verification Protocol
+
+Always verify that the specialist has been "read" by asking:
+`"What are the specific 'Banned Patterns' for the @skill-name you just loaded?"`
+This confirms the agent is bounded by the specialist's constraints, not just its general knowledge.

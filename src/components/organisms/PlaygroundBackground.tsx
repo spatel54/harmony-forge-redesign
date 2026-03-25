@@ -19,7 +19,7 @@ export const PlaygroundBackground = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative w-full min-h-screen overflow-hidden transition-[background] duration-500",
+        "relative w-full min-h-screen overflow-hidden motion-safe:transition-[background] motion-safe:duration-500",
         className,
       )}
       style={{
