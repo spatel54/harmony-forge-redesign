@@ -91,7 +91,7 @@ const STEPS: StepDef[] = [
     route: "/sandbox",
     title: "Ask the Theory Inspector",
     body: "Click this button to open the Theory Inspector panel and get Glass Box explanations for every voice-leading decision in your arrangement.",
-    caretSide: "top",
+    caretSide: "bottom",
   },
   {
     step: 9,
