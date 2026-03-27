@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/atoms/ThemeProvider";
+import { CoachmarkOverlay } from "@/components/organisms/CoachmarkOverlay";
 
 export default function RootLayout({
   children,
@@ -54,6 +55,7 @@ export default function RootLayout({
           <main id="main-content" className="w-full h-full relative">
             {children}
           </main>
+          <CoachmarkOverlay />
         </ThemeProvider>
       </body>
     </html>

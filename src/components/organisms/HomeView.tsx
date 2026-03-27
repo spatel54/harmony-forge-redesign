@@ -8,7 +8,6 @@ import { DropzoneCopy } from "@/components/organisms/DropzoneCopy";
 import { TransitionOverlay } from "@/components/organisms/TransitionOverlay";
 import { BrandTitle } from "@/components/atoms/BrandTitle";
 import { useUploadStore } from "@/store/useUploadStore";
-import { OnboardingModal } from "@/components/organisms/OnboardingModal";
 
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".xml", ".mxl", ".midi", ".mid"]);
 
@@ -20,13 +19,7 @@ const ALLOWED_EXTENSIONS = new Set([".pdf", ".xml", ".mxl", ".midi", ".mid"]);
 export function HomeView() {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = React.useState(false);
-  const [showModal, setShowModal] = React.useState(false);
   const setUploadedFile = useUploadStore((state) => state.setUploadedFile);
-
-  // SSR-safe: set after mount to avoid hydration mismatch
-  React.useEffect(() => {
-    setShowModal(true);
-  }, []);
 
   const handleFileUpload = (files: FileList) => {
     const file = files[0];
@@ -66,8 +59,6 @@ export function HomeView() {
 
       {/* Loading overlay — mounts over everything */}
       <TransitionOverlay variant="parsing" visible={isTransitioning} />
-
-      {showModal && <OnboardingModal onDismiss={() => setShowModal(false)} />}
     </>
   );
 }
