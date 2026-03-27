@@ -101,11 +101,13 @@ export default function TactileSandboxPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [setExpanded]);
 
-  // Export modal
-  const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+  // Export modal — FEATURE: COACHMARKS: migrated to store so the tour can trigger it; restore local state when removing tour
+  const isExportModalOpen = useSandboxStore((s) => s.isExportModalOpen);
+  const setIsExportModalOpen = useSandboxStore((s) => s.setExportModalOpen);
 
-  // Theory inspector open/close
-  const [isInspectorOpen, setIsInspectorOpen] = React.useState(false);
+  // Theory inspector — FEATURE: COACHMARKS: migrated to store so tour step 7 can open it; restore local state when removing tour
+  const isInspectorOpen = useSandboxStore((s) => s.isInspectorOpen);
+  const setIsInspectorOpen = useSandboxStore((s) => s.setInspectorOpen);
 
   // Inspector resizable width
   const [inspectorWidth, setInspectorWidth] = React.useState(380);
@@ -197,8 +199,8 @@ export default function TactileSandboxPage() {
     }, 800);
   }, [chatInput]);
 
-  const handleExport = (format: string) => {
-    console.log(`Exporting as ${format}...`);
+  const handleExport = (formats: string[]) => {
+    console.log(`Exporting as ${formats.join(", ")}...`);
     setIsExportModalOpen(false);
   };
 
@@ -217,6 +219,7 @@ export default function TactileSandboxPage() {
           {/* ScorePalette — hidden in expanded mode */}
           {!isExpanded && (
             <ScorePalette
+              data-coachmark="step-5"
               className="h-[192px] shrink-0"
               searchValue={searchValue}
               onSearchChange={setSearchValue}
@@ -227,7 +230,7 @@ export default function TactileSandboxPage() {
           )}
 
           {/* Canvas wrapper — relative for FAB + zoom controls */}
-          <div className="relative flex-1 min-h-0">
+          <div data-coachmark="step-6" className="relative flex-1 min-h-0">
             <ScoreCanvas
               className="w-full h-full"
               showViolations={isInspectorOpen}
@@ -301,8 +304,10 @@ export default function TactileSandboxPage() {
           </div>
 
           {/* Playback bar — hidden in expanded mode */}
+          {/* FEATURE: COACHMARKS — step-7 target */}
           {!isExpanded && (
             <SandboxPlaybackBar
+              data-coachmark="step-7"
               className="shrink-0"
               title="Sonata in C Major"
               subtitle="W.A. Mozart • K. 545"
@@ -320,6 +325,7 @@ export default function TactileSandboxPage() {
         {/* Right column: Theory Inspector — hidden in expanded mode */}
         {isInspectorOpen && !isExpanded && (
           <div
+            data-coachmark="step-8"
             className="relative shrink-0 h-full overflow-hidden flex"
             style={{ width: inspectorWidth }}
           >

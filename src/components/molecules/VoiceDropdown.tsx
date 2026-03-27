@@ -5,33 +5,33 @@ import { ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { VoiceType } from "@/components/atoms/PartChip";
 
-/** Voice-keyed semantic styles — fixed, cross-theme (MASTER.md §1) */
+/** Voice-keyed semantic styles — colors resolved from CSS vars for theme awareness */
 const VOICE_STYLES: Record<
   VoiceType,
   { letter: string; textColor: string; badgeBg: string; borderColor: string }
 > = {
   soprano: {
     letter: "S",
-    textColor: "#D32F2F",
-    badgeBg: "#D32F2F33",
-    borderColor: "#D32F2FB3",
+    textColor: "var(--hf-voice-soprano)",
+    badgeBg: "var(--hf-voice-soprano-bg)",
+    borderColor: "var(--hf-voice-soprano)",
   },
   alto: {
     letter: "A",
-    textColor: "#1976D2",
-    badgeBg: "#1976D233",
-    borderColor: "#1976D2B3",
+    textColor: "var(--hf-voice-alto)",
+    badgeBg: "var(--hf-voice-alto-bg)",
+    borderColor: "var(--hf-voice-alto)",
   },
   tenor: {
     letter: "T",
-    textColor: "#FFB300",
-    badgeBg: "#FFB3001A",
-    borderColor: "#FFB300B3",
+    textColor: "var(--hf-voice-tenor)",
+    badgeBg: "var(--hf-voice-tenor-bg)",
+    borderColor: "var(--hf-voice-tenor)",
   },
   bass: {
     letter: "B",
-    textColor: "#7B1FA2",
-    badgeBg: "#7B1FA21A",
+    textColor: "var(--hf-voice-bass)",
+    badgeBg: "var(--hf-voice-bass-bg)",
     borderColor: "#7B1FA2B3",
   },
 };

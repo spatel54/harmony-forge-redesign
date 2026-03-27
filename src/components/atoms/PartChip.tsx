@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 
 export type VoiceType = "soprano" | "alto" | "tenor" | "bass";
 
-/** Semantic colors per voice — fixed, cross-theme (MASTER.md §1) */
+/** Semantic colors per voice — resolved from CSS custom properties for theme awareness */
 const VOICE_COLORS: Record<VoiceType, { text: string; bg: string }> = {
-  soprano: { text: "#D32F2F", bg: "#D32F2F1A" },
-  alto:    { text: "#1976D2", bg: "#1976D21A" },
-  tenor:   { text: "#FFB300", bg: "#FFB3001A" },
-  bass:    { text: "#7B1FA2", bg: "#7B1FA21A" },
+  soprano: { text: "var(--hf-voice-soprano)", bg: "var(--hf-voice-soprano-bg)" },
+  alto:    { text: "var(--hf-voice-alto)",    bg: "var(--hf-voice-alto-bg)" },
+  tenor:   { text: "var(--hf-voice-tenor)",   bg: "var(--hf-voice-tenor-bg)" },
+  bass:    { text: "var(--hf-voice-bass)",    bg: "var(--hf-voice-bass-bg)" },
 };
 
 export interface PartChipProps extends React.HTMLAttributes<HTMLSpanElement> {

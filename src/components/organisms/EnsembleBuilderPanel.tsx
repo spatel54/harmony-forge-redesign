@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VoiceDropdown } from "@/components/molecules/VoiceDropdown";
 import { EnsemblePreviewCard, type SelectedPart } from "@/components/molecules/EnsemblePreviewCard";
@@ -138,10 +137,6 @@ export const EnsembleBuilderPanel = React.forwardRef<
             color: "var(--text-on-light)",
           }}
         >
-          <Sparkles
-            className="w-4 h-4 shrink-0"
-            aria-hidden="true"
-          />
           Generate Harmonies
         </button>
       </div>

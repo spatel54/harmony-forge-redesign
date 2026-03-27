@@ -63,7 +63,7 @@ export const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
 
           {timestamp && (
             <span
-              className="font-body text-[9px] font-normal"
+              className="font-body text-[10px] font-normal"
               style={{ color: "var(--hf-text-secondary)" }}
             >
               {timestamp}
@@ -115,7 +115,7 @@ export const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
 
           {timestamp && (
             <span
-              className="font-body text-[9px] font-normal"
+              className="font-body text-[10px] font-normal"
               style={{ color: "var(--hf-text-secondary)" }}
             >
               {timestamp}
@@ -150,8 +150,8 @@ export const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
 
         {timestamp && (
           <span
-            className="font-body text-[9px] font-normal"
-            style={{ color: "#7A6050" }}
+            className="font-body text-[10px] font-normal"
+            style={{ color: "var(--hf-text-sub)" }}
           >
             {timestamp}
           </span>

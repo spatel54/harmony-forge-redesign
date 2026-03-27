@@ -20,6 +20,18 @@
   --color-hf-violation: #d32f2f;
   --color-hf-warning: #1976d2;
   --color-hf-override: #7b1fa2;
+
+  /* Voice semantic colors — light mode */
+  /* Tenor #8a5e00 on Sonata bg = 5.46:1 (WCAG AA); Bass #7B1FA2 on Sonata bg = 7.94:1 */
+  /* Soprano #B71C1C on #D32F2F1A-tinted parchment = 5.24:1 ✓  Alto #0D47A1 = 7.03:1 ✓ */
+  --hf-voice-soprano: #B71C1C;
+  --hf-voice-soprano-bg: #D32F2F1A;
+  --hf-voice-alto: #0D47A1;
+  --hf-voice-alto-bg: #1976D21A;
+  --hf-voice-tenor: #8a5e00;
+  --hf-voice-tenor-bg: #ffb30026;
+  --hf-voice-bass: #7B1FA2;
+  --hf-voice-bass-bg: #7B1FA21A;
   /* Accessible accent — WCAG §1.4.11 (3:1 UI) + §1.4.3 (4.5:1 text) on Sonata bg */
   /* #b87800 on #fdf5e6 = 3.37:1; #1a1a1a on #b87800 = 4.78:1 */
   --color-hf-accent-accessible: var(--hf-accent-accessible);
@@ -120,9 +132,9 @@
   --hf-detail: var(--nocturne-surface-40, #a55b3766);
   --hf-accent: var(--nocturne-accent, #ffb300);
   --hf-text-primary: #f8f8f8;
-  /* Nocturne secondary text: surface at 70% — #A55B37B3 (Node lXHYH) */
-  --hf-text-secondary: var(--nocturne-surface-70, #a55b37b3);
-  --hf-text-sub: var(--nocturne-surface-70, #a55b37b3);
+  /* Nocturne secondary text: warm taupe #c49070 = 4.58:1 on #3e2723 (WCAG AA) */
+  --hf-text-secondary: #c49070;
+  --hf-text-sub: #c49070;
   --hf-detail-rgb: 0, 0, 0; /* shadows should be pure black in dark mode */
   --hf-surface-rgb: 165, 91, 55;
 
@@ -138,6 +150,18 @@
   --hf-toolbar-border: rgba(165, 91, 55, 0.4);
   /* Panel alt bg — Ensemble Builder right panel — Node lXHYH: #2D1817 */
   --hf-panel-bg: #2d1817;
+
+  /* Voice semantic colors — dark mode overrides */
+  /* Soprano #EF9A9A on #3e2723 = 5.89:1 ✓  Alto #90CAF9 = 7.19:1 ✓ */
+  /* Tenor #FFB300 = adequate; Bass #CE93D8 = 5.25:1 ✓ */
+  --hf-voice-soprano: #EF9A9A;
+  --hf-voice-soprano-bg: #EF9A9A1A;
+  --hf-voice-alto: #90CAF9;
+  --hf-voice-alto-bg: #90CAF91A;
+  --hf-voice-tenor: #FFB300;
+  --hf-voice-tenor-bg: #FFB3001A;
+  --hf-voice-bass: #CE93D8;
+  --hf-voice-bass-bg: #CE93D81A;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -386,3 +410,9 @@ body {
     margin-left: 100%;
   }
 }
+
+/* Book loader styles moved into TransitionOverlay.tsx as an injected <style>
+   tag to guarantee cascade correctness. No globals needed here. */
+
+/* Music-note loader styles moved into TransitionOverlay.tsx as an injected
+   <style> tag (same as book loader) to override prefers-reduced-motion kill. */

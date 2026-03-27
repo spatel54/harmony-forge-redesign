@@ -1,10 +1,16 @@
+"use client";
+
 import React from "react";
 import { cn } from "@/lib/utils";
 import { PlaybackBar } from "@/components/molecules/PlaybackBar";
+import { ScorePaginationDock } from "@/components/molecules/ScorePaginationDock";
 
 export interface ScorePreviewPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   scoreTitle?: string;
+  /** Score metadata — page info is appended automatically; do not include "Page X of Y" here */
   scoreMeta?: string;
+  /** Total number of pages for the pagination dock (default: 4) */
+  totalPages?: number;
   /** Dynamic aria-label for the score canvas — e.g. "Score preview: The First Noel" */
   canvasAriaLabel?: string;
   /** Uploaded filename — when present, shows "Reviewing: [filename]" context line */
@@ -27,7 +33,8 @@ export const ScorePreviewPanel = React.forwardRef<
   (
     {
       scoreTitle = "The First Noel",
-      scoreMeta = "Traditional • 4 voices • Page 1 of 4",
+      scoreMeta = "Traditional • 4 voices",
+      totalPages = 4,
       canvasAriaLabel,
       filename,
       onChangeFile,
@@ -37,6 +44,8 @@ export const ScorePreviewPanel = React.forwardRef<
     },
     ref,
   ) => {
+    const [currentPage, setCurrentPage] = React.useState(1);
+
     return (
       <div
         ref={ref}
@@ -52,33 +61,35 @@ export const ScorePreviewPanel = React.forwardRef<
         {...props}
       >
         {/* Score info block — Node TqhQo */}
-        <div className="flex flex-col gap-[4px] w-full">
+        <div className="flex flex-col gap-[8px] w-full">
           {/* Title */}
           <h2
-            className="font-brand text-[22px] font-normal leading-none text-center"
+            className="font-brand text-[22px] font-normal leading-snug text-center"
             style={{ color: "var(--hf-text-primary)" }}
           >
             {scoreTitle}
           </h2>
 
-          {/* Meta subtitle */}
+          {/* Meta subtitle — page appended dynamically */}
           <p
             className="font-mono text-[11px] font-normal leading-none text-center"
             style={{ color: "var(--hf-text-secondary)" }}
+            aria-live="polite"
+            aria-label={`${scoreMeta} • Page ${currentPage} of ${totalPages}`}
           >
-            {scoreMeta}
+            {scoreMeta} • Page {currentPage} of {totalPages}
           </p>
 
           {/* Metadata tag row — Node HSp9s */}
           <div
-            className="flex items-center justify-center gap-[6px] mt-[8px]"
+            className="flex items-center justify-center gap-[8px] mt-[4px]"
             role="list"
             aria-label="Score metadata"
           >
             {/* TagSATB */}
             <span
               role="listitem"
-              className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px] border"
+              className="font-mono text-[10px] font-normal leading-none rounded-full px-[12px] py-[6px] border"
               style={{
                 color: "var(--hf-text-primary)",
                 backgroundColor:
@@ -92,7 +103,7 @@ export const ScorePreviewPanel = React.forwardRef<
             {/* Tag44 */}
             <span
               role="listitem"
-              className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px] border"
+              className="font-mono text-[10px] font-normal leading-none rounded-full px-[12px] py-[6px] border"
               style={{
                 color: "var(--hf-text-primary)",
                 backgroundColor:
@@ -106,7 +117,7 @@ export const ScorePreviewPanel = React.forwardRef<
             {/* TagTrad */}
             <span
               role="listitem"
-              className="font-mono text-[10px] font-normal leading-none rounded-full px-[10px] py-[4px] border"
+              className="font-mono text-[10px] font-normal leading-none rounded-full px-[12px] py-[6px] border"
               style={{
                 color: "var(--hf-text-primary)",
                 backgroundColor:
@@ -118,28 +129,6 @@ export const ScorePreviewPanel = React.forwardRef<
             </span>
           </div>
 
-          {/* Reviewing context — visible only when filename is provided */}
-          {filename && (
-            <p
-              className="font-mono text-[10px] font-normal leading-none text-center mt-[6px]"
-              style={{ color: "var(--hf-text-sub)" }}
-            >
-              Reviewing: {filename}
-              {onChangeFile && (
-                <>
-                  {" · "}
-                  <button
-                    type="button"
-                    onClick={onChangeFile}
-                    className="underline underline-offset-2 hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--hf-accent)]"
-                    style={{ color: "var(--hf-text-sub)" }}
-                  >
-                    Change file
-                  </button>
-                </>
-              )}
-            </p>
-          )}
         </div>
 
         {/* Score Canvas — Node qkNNs — VexFlow placeholder */}
@@ -149,10 +138,18 @@ export const ScorePreviewPanel = React.forwardRef<
             "border border-[var(--hf-detail)] score-canvas-container",
           )}
           role="img"
-          aria-label={canvasAriaLabel ?? "Score preview canvas"}
+          aria-label={canvasAriaLabel ?? `Score preview canvas, page ${currentPage} of ${totalPages}`}
         >
           {/* Static staff-line grid matching design placeholder */}
           <StaffLinePlaceholder />
+
+          {/* Page navigation dock — floats bottom-center of canvas */}
+          <ScorePaginationDock
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          />
         </div>
 
         {/* Playback bar — Node RctEd */}

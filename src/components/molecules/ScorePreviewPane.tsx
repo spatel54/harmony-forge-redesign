@@ -41,10 +41,10 @@ export function ScorePreviewPane({ className }: ScorePreviewPaneProps) {
 
       {/* Footer */}
       <div className="flex flex-col items-center justify-center h-[72px] gap-[4px] border-t border-[var(--hf-detail)] bg-[var(--hf-bg)] shrink-0 rounded-bl-[8px]">
-        <span className="font-mono text-[10px] text-[var(--hf-text-primary)] opacity-50">
+        <span className="font-mono text-[10px] text-[var(--hf-text-secondary)]">
           4 voices · 3 measures · 1 violation
         </span>
-        <span className="font-sans text-[10px] text-[var(--hf-text-primary)] opacity-35">
+        <span className="font-sans text-[10px] text-[var(--hf-text-sub)]">
           Last edited 2 min ago
         </span>
       </div>

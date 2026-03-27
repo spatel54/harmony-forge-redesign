@@ -6,7 +6,7 @@ import { ExportOptionsPane } from "../molecules/ExportOptionsPane";
 export interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (format: string) => void;
+  onExport: (formats: string[]) => void;
   className?: string;
 }
 

@@ -231,7 +231,7 @@ export const TheoryInspectorPanel = React.forwardRef<
                       style={{ backgroundColor: "var(--hf-detail)" }}
                     />
                     <span
-                      className="font-mono text-[9px] font-normal shrink-0"
+                      className="font-mono text-[10px] font-normal shrink-0"
                       style={{ color: "var(--hf-text-secondary)" }}
                     >
                       {msg.content}

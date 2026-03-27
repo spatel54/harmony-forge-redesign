@@ -132,7 +132,7 @@ export const ViolationCard = React.forwardRef<
         {/* Timestamp — Node hsDOw: Inter fs:9 fill:#7A6050 */}
         {timestamp && (
           <p
-            className="font-body text-[9px] font-normal"
+            className="font-body text-[10px] font-normal"
             style={{ color: "var(--hf-text-secondary)" }}
             aria-label={`Sent at ${timestamp}`}
           >

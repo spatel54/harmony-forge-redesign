@@ -14,7 +14,7 @@ import { ExportFormatCard } from "../atoms/ExportFormatCard";
 
 export interface ExportOptionsPaneProps {
   onClose?: () => void;
-  onExport?: (format: string) => void;
+  onExport?: (formats: string[]) => void;
   className?: string;
 }
 
@@ -23,7 +23,7 @@ export function ExportOptionsPane({
   onExport,
   className,
 }: ExportOptionsPaneProps) {
-  const [selectedFormat, setSelectedFormat] = useState<string>("pdf");
+  const [selectedFormats, setSelectedFormats] = useState<Set<string>>(new Set(["pdf"]));
 
   const formats = [
     { id: "pdf", icon: FileText, label: "PDF", desc: "Print-ready" },
@@ -45,12 +45,12 @@ export function ExportOptionsPane({
     >
       {/* Header */}
       <div className="flex items-center justify-between h-[60px] px-[32px] border-b border-[var(--hf-detail)] shrink-0">
-        <div className="flex flex-col gap-[2px]">
+        <div className="flex flex-col gap-[6px]">
           <h2 className="font-serif text-[22px] text-[var(--hf-text-primary)] leading-none">
             Export As
           </h2>
-          <span className="font-sans text-[12px] text-[var(--hf-text-primary)] opacity-45 leading-none">
-            Choose a format below
+          <span className="font-sans text-[12px] text-[var(--hf-text-secondary)] leading-none">
+            Select one or more formats
           </span>
         </div>
         <button
@@ -62,8 +62,9 @@ export function ExportOptionsPane({
       </div>
 
       {/* Body - Format Grid */}
-      <div className="flex-1 overflow-y-auto px-[32px] py-[24px] flex flex-col gap-[20px]">
-        <span className="font-mono text-[9px] font-medium text-[var(--hf-text-primary)] opacity-40 uppercase tracking-wider">
+      {/* FEATURE: COACHMARKS — step-10 target */}
+      <div data-coachmark="step-10" className="flex-1 overflow-y-auto px-[32px] py-[24px] flex flex-col gap-[20px]">
+        <span className="font-mono text-[10px] font-medium text-[var(--hf-text-secondary)] uppercase tracking-wider">
           Format
         </span>
 
@@ -74,8 +75,14 @@ export function ExportOptionsPane({
               icon={f.icon}
               label={f.label}
               description={f.desc}
-              selected={selectedFormat === f.id}
-              onClick={() => setSelectedFormat(f.id)}
+              selected={selectedFormats.has(f.id)}
+              onClick={() =>
+                setSelectedFormats((prev) => {
+                  const next = new Set(prev);
+                  next.has(f.id) ? next.delete(f.id) : next.add(f.id);
+                  return next;
+                })
+              }
             />
           ))}
         </div>
@@ -87,8 +94,14 @@ export function ExportOptionsPane({
               icon={f.icon}
               label={f.label}
               description={f.desc}
-              selected={selectedFormat === f.id}
-              onClick={() => setSelectedFormat(f.id)}
+              selected={selectedFormats.has(f.id)}
+              onClick={() =>
+                setSelectedFormats((prev) => {
+                  const next = new Set(prev);
+                  next.has(f.id) ? next.delete(f.id) : next.add(f.id);
+                  return next;
+                })
+              }
             />
           ))}
         </div>
@@ -96,13 +109,20 @@ export function ExportOptionsPane({
 
       {/* Footer */}
       <div className="flex items-center justify-end h-[72px] px-[32px] border-t border-[var(--hf-detail)] shrink-0">
+        {/* FEATURE: COACHMARKS — step-11 target */}
         <button
-          onClick={() => onExport?.(selectedFormat)}
-          className="flex items-center gap-[8px] h-[40px] px-[24px] rounded-[6px] bg-[var(--hf-surface)] text-white hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hf-panel-bg)]"
+          data-coachmark="step-11"
+          onClick={() => onExport?.(Array.from(selectedFormats))}
+          disabled={selectedFormats.size === 0}
+          aria-disabled={selectedFormats.size === 0}
+          className="flex items-center gap-[8px] h-[40px] px-[24px] rounded-[6px] bg-[var(--hf-surface)] text-white hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hf-panel-bg)] disabled:opacity-40 disabled:pointer-events-none"
         >
           <span className="font-mono text-[12px] font-medium mt-0.5">
-            Export{" "}
-            {formats.find((f) => f.id === selectedFormat)?.label.toUpperCase()}
+            {selectedFormats.size === 0
+              ? "Export"
+              : selectedFormats.size === 1
+                ? `Export ${formats.find((f) => selectedFormats.has(f.id))?.label.toUpperCase()}`
+                : `Export ${selectedFormats.size} Formats`}
           </span>
         </button>
       </div>

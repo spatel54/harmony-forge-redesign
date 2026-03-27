@@ -38,26 +38,12 @@ export const EnsemblePreviewCard = React.forwardRef<
       >
         {/* Header row — Node 7bP8H */}
         <div className="flex items-center justify-between w-full flex-wrap gap-[8px]">
-          <div className="flex items-center gap-[8px]">
-            <span
-              className="font-mono text-[12px] font-bold leading-none"
-              style={{ color: "var(--hf-text-primary)" }}
-            >
-              Ensemble Preview
-            </span>
-            {/* "Traditional" style tag — unified treatment */}
-            <span
-              className="inline-flex items-center rounded-full font-mono text-[10px] font-normal leading-none px-[10px] py-[4px] border"
-              style={{
-                color: "var(--hf-text-primary)",
-                backgroundColor:
-                  "color-mix(in srgb, var(--hf-surface) 10%, transparent)",
-                borderColor: "var(--hf-detail)",
-              }}
-            >
-              Traditional
-            </span>
-          </div>
+          <span
+            className="font-mono text-[12px] font-bold leading-none"
+            style={{ color: "var(--hf-text-primary)" }}
+          >
+            Ensemble Preview
+          </span>
           <span
             className="font-mono text-[11px] font-normal leading-none"
             style={{ color: "var(--hf-text-sub)" }}
