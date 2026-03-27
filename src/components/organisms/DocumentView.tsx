@@ -7,6 +7,7 @@ import { ScorePreviewPanel } from "@/components/organisms/ScorePreviewPanel";
 import { EnsembleBuilderPanel } from "@/components/organisms/EnsembleBuilderPanel";
 import { TransitionOverlay } from "@/components/organisms/TransitionOverlay";
 import { useUploadStore } from "@/store/useUploadStore";
+import { useCoachmarkStore } from "@/store/useCoachmarkStore";
 
 /**
  * DocumentView — client-side view for /document
@@ -17,13 +18,15 @@ export function DocumentView() {
   const router = useRouter();
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const filename = useUploadStore((s) => s.filename);
+  const isTourActive = useCoachmarkStore((s) => s.isActive);
 
-  // Redirect guard — if no file has been uploaded, send back to upload step
+  // Redirect guard — bypass during coachmark tour so demo navigation works;
+  // enforce when tour is inactive and no file has been uploaded.
   React.useEffect(() => {
-    if (!filename) {
+    if (!filename && !isTourActive) {
       router.push("/");
     }
-  }, [filename, router]);
+  }, [filename, isTourActive, router]);
 
   // Derive piece title: strip file extension from filename
   const pieceTitle = filename
