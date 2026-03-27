@@ -55,10 +55,10 @@ export const useCoachmarkStore = create<CoachmarkState>()(
     }),
     {
       name: "hf-coachmarks",
+      // hasDismissed is intentionally NOT persisted — tour restarts on every page load.
       partialize: (state) => ({
         isActive: state.isActive,
         currentStep: state.currentStep,
-        hasDismissed: state.hasDismissed,
       }),
     },
   ),
