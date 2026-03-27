@@ -46,6 +46,7 @@ export const SandboxHeader = React.forwardRef<HTMLElement, SandboxHeaderProps>(
         {/* Right controls — Node 9zJvZ */}
         <div className="flex items-center gap-[12px]">
           <button
+            data-coachmark="step-9"
             onClick={onExportClick}
             className="flex items-center gap-[6px] h-[32px] px-[12px] rounded-[6px] border border-[var(--hf-detail)] text-[var(--hf-text-primary)] hover:bg-[rgba(var(--hf-surface-rgb),0.05)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hf-surface)]"
           >

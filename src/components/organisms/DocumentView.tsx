@@ -42,18 +42,19 @@ export function DocumentView() {
     <>
       <div className="flex flex-col w-screen h-screen overflow-hidden bg-(--hf-bg)">
         {/* Top navigation bar */}
-        <DocumentHeader currentStep={2} showBack />
+        <DocumentHeader data-coachmark="step-2" currentStep={2} showBack />
 
         {/* Two-panel body */}
         <div className="flex flex-row flex-1 min-h-0">
           <ScorePreviewPanel
+            data-coachmark="step-3"
             scoreTitle={pieceTitle}
             canvasAriaLabel={`Score preview: ${pieceTitle}`}
             filename={filename ?? undefined}
             onChangeFile={() => router.push("/")}
             onReupload={() => router.push("/")}
           />
-          <EnsembleBuilderPanel onGenerateHarmonies={handleGenerate} />
+          <EnsembleBuilderPanel data-coachmark="step-4" onGenerateHarmonies={handleGenerate} />
         </div>
       </div>
 

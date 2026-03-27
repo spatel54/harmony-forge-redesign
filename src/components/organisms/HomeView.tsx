@@ -47,7 +47,7 @@ export function HomeView() {
           </div>
 
           {/* Scaled down music stand (max 1000px) flush with the bottom */}
-          <div className="w-full max-w-[1000px] shrink-0 mt-8">
+          <div data-coachmark="step-1" className="w-full max-w-[1000px] shrink-0 mt-8">
             <DropzoneCopy
               onFileDrop={handleFileUpload}
               onFileSelect={handleFileUpload}
