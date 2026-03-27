@@ -63,7 +63,7 @@ export function ExportOptionsPane({
 
       {/* Body - Format Grid */}
       {/* FEATURE: COACHMARKS — step-10 target */}
-      <div data-coachmark="step-10" className="flex-1 overflow-y-auto px-[32px] py-[24px] flex flex-col gap-[20px]">
+      <div data-coachmark="step-12" className="flex-1 overflow-y-auto px-[32px] py-[24px] flex flex-col gap-[20px]">
         <span className="font-mono text-[10px] font-medium text-[var(--hf-text-secondary)] uppercase tracking-wider">
           Format
         </span>
@@ -111,7 +111,7 @@ export function ExportOptionsPane({
       <div className="flex items-center justify-end h-[72px] px-[32px] border-t border-[var(--hf-detail)] shrink-0">
         {/* FEATURE: COACHMARKS — step-11 target */}
         <button
-          data-coachmark="step-11"
+          data-coachmark="step-13"
           onClick={() => onExport?.(Array.from(selectedFormats))}
           disabled={selectedFormats.size === 0}
           aria-disabled={selectedFormats.size === 0}

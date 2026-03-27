@@ -89,26 +89,40 @@ const STEPS: StepDef[] = [
   {
     step: 8,
     route: "/sandbox",
+    title: "Ask the Theory Inspector",
+    body: "Click this button to open the Theory Inspector panel and get Glass Box explanations for every voice-leading decision in your arrangement.",
+    caretSide: "top",
+  },
+  {
+    step: 9,
+    route: "/sandbox",
     title: "The Glass Box",
     body: "Every harmony decision is explained in this panel. Red flags mark violations with academic citations and suggested fixes.",
     caretSide: "right",
   },
   {
-    step: 9,
+    step: 10,
     route: "/sandbox",
     title: "Export your score",
     body: "When you are ready, click Export to open the export dialog and choose your output format.",
     caretSide: "top",
   },
   {
-    step: 10,
+    step: 11,
+    route: "/sandbox",
+    title: "Preview before exporting",
+    body: "Review your score one last time in this preview pane before choosing an output format.",
+    caretSide: "right",
+  },
+  {
+    step: 12,
     route: "/sandbox",
     title: "Choose a format",
     body: "Select from MusicXML, MIDI, PDF, PNG, JSON, audio, or a full ZIP archive. Pick the format that fits your workflow.",
     caretSide: "right",
   },
   {
-    step: 11,
+    step: 13,
     route: "/sandbox",
     title: "Download your arrangement",
     body: "Hit Export to download the file. Your arrangement is ready for notation software, a DAW, or live performance.",
@@ -411,8 +425,8 @@ export function CoachmarkOverlay() {
     if (stepDef.route !== pathname) return;
 
     // Ensure required panels are open for specific steps
-    if (currentStep === 8) setInspectorOpen(true);
-    if (currentStep === 10 || currentStep === 11) setExportModalOpen(true);
+    if (currentStep === 9) setInspectorOpen(true);
+    if (currentStep === 11 || currentStep === 12 || currentStep === 13) setExportModalOpen(true);
 
     // Poll with rAF until the target element appears in the DOM
     let raf: number;
@@ -465,7 +479,7 @@ export function CoachmarkOverlay() {
 
   const handlePrev = React.useCallback(() => {
     if (currentStep <= 1) return;
-    if (currentStep === 10) setExportModalOpen(false);
+    if (currentStep === 11) setExportModalOpen(false);
     const prevRoute = STEP_ROUTES[currentStep - 1];
     prevStep();
     if (prevRoute !== pathname) router.push(prevRoute);

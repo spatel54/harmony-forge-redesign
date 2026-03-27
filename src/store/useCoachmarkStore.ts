@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export const COACHMARKS_ENABLED = true;
-export const TOTAL_STEPS = 11;
+export const TOTAL_STEPS = 13;
 
 /** Maps step number → app route. */
 export const STEP_ROUTES: Record<number, string> = {
@@ -18,6 +18,8 @@ export const STEP_ROUTES: Record<number, string> = {
   9: "/sandbox",
   10: "/sandbox",
   11: "/sandbox",
+  12: "/sandbox",
+  13: "/sandbox",
 };
 
 interface CoachmarkState {

@@ -8,8 +8,6 @@ import {
   Pause,
   FastForward,
   SkipForward,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSandboxStore } from "@/store/useSandboxStore";
@@ -18,13 +16,9 @@ import { usePlayback } from "@/lib/audio/usePlayback";
 export interface SandboxPlaybackBarProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   subtitle?: string;
-  currentPage?: number;
-  totalPages?: number;
   onRewind?: () => void;
   onFastForward?: () => void;
   onSkipForward?: () => void;
-  onPrevPage?: () => void;
-  onNextPage?: () => void;
 }
 
 /**
@@ -55,13 +49,9 @@ export const SandboxPlaybackBar = React.forwardRef<
     {
       title = "Sonata in C Major",
       subtitle = "W.A. Mozart • K. 545",
-      currentPage = 1,
-      totalPages = 4,
       onRewind,
       onFastForward,
       onSkipForward,
-      onPrevPage,
-      onNextPage,
       className,
       ...props
     },
@@ -210,62 +200,6 @@ export const SandboxPlaybackBar = React.forwardRef<
           </button>
         </div>
 
-        {/* ── Right: Pagination ── Node Rfau3 ──────────────── */}
-        <div
-          className="flex items-center gap-[12px]"
-          role="group"
-          aria-label="Page navigation"
-        >
-          {/* PrevBtn: 28×28 r:16 */}
-          <button
-            type="button"
-            onClick={onPrevPage}
-            aria-label="Previous page"
-            disabled={currentPage <= 1}
-            className={cn(
-              iconBtn,
-              "flex items-center justify-center w-[28px] h-[28px] rounded-[16px]",
-              "disabled:opacity-30 disabled:cursor-not-allowed",
-            )}
-            style={{ color: "var(--text-on-light)" }}
-          >
-            <ChevronLeft
-              className="w-[16px] h-[16px]"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            />
-          </button>
-
-          {/* PageCounter: IBM Plex Mono fs:13 fw:500 */}
-          <span
-            className="font-mono text-[13px] font-medium tabular-nums whitespace-nowrap"
-            style={{ color: "var(--text-on-light)" }}
-            aria-live="polite"
-            aria-label={`Page ${currentPage} of ${totalPages}`}
-          >
-            Page {currentPage} / {totalPages}
-          </span>
-
-          {/* NextBtn: 28×28 r:16 */}
-          <button
-            type="button"
-            onClick={onNextPage}
-            aria-label="Next page"
-            disabled={currentPage >= totalPages}
-            className={cn(
-              iconBtn,
-              "flex items-center justify-center w-[28px] h-[28px] rounded-[16px]",
-              "disabled:opacity-30 disabled:cursor-not-allowed",
-            )}
-            style={{ color: "var(--text-on-light)" }}
-          >
-            <ChevronRight
-              className="w-[16px] h-[16px]"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            />
-          </button>
-        </div>
       </div>
     );
   },

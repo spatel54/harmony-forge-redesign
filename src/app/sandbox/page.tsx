@@ -297,7 +297,7 @@ export default function TactileSandboxPage() {
 
             {/* ChatFAB — shown only when inspector is closed */}
             {!isInspectorOpen && (
-              <div className="absolute bottom-[28px] right-[28px]">
+              <div data-coachmark="step-8" className="absolute bottom-[28px] right-[28px]">
                 <ChatFAB onClick={() => setIsInspectorOpen(true)} />
               </div>
             )}
@@ -311,13 +311,6 @@ export default function TactileSandboxPage() {
               className="shrink-0"
               title="Sonata in C Major"
               subtitle="W.A. Mozart • K. 545"
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onSkipForward={() => setCurrentPage(totalPages)}
-              onPrevPage={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              onNextPage={() =>
-                setCurrentPage((p) => Math.min(totalPages, p + 1))
-              }
             />
           )}
         </div>
@@ -325,7 +318,7 @@ export default function TactileSandboxPage() {
         {/* Right column: Theory Inspector — hidden in expanded mode */}
         {isInspectorOpen && !isExpanded && (
           <div
-            data-coachmark="step-8"
+            data-coachmark="step-9"
             className="relative shrink-0 h-full overflow-hidden flex"
             style={{ width: inspectorWidth }}
           >

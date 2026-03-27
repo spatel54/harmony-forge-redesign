@@ -9,6 +9,7 @@ export interface ScorePreviewPaneProps {
 export function ScorePreviewPane({ className }: ScorePreviewPaneProps) {
   return (
     <div
+      data-coachmark="step-11"
       className={cn(
         "flex flex-col w-[480px] h-[700px] shrink-0",
         "bg-[var(--hf-bg)] border-r border-[var(--hf-detail)] rounded-l-[8px]",
