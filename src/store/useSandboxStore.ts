@@ -19,6 +19,12 @@ interface SandboxState {
   // Score maximize
   isExpanded: boolean;
   setExpanded: (v: boolean) => void;
+  // Export modal
+  isExportModalOpen: boolean;
+  setExportModalOpen: (v: boolean) => void;
+  // Theory inspector
+  isInspectorOpen: boolean;
+  setInspectorOpen: (v: boolean) => void;
 }
 
 export const useSandboxStore = create<SandboxState>((set) => ({
@@ -41,4 +47,10 @@ export const useSandboxStore = create<SandboxState>((set) => ({
   // Score maximize
   isExpanded: false,
   setExpanded: (v: boolean) => set({ isExpanded: v }),
+  // Export modal
+  isExportModalOpen: false,
+  setExportModalOpen: (v: boolean) => set({ isExportModalOpen: v }),
+  // Theory inspector
+  isInspectorOpen: false,
+  setInspectorOpen: (v: boolean) => set({ isInspectorOpen: v }),
 }));

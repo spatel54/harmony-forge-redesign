@@ -63,7 +63,9 @@ export const ScoreCanvas = React.forwardRef<HTMLDivElement, ScoreCanvasProps>(
 
       const renderScore = () => {
         // Dynamic import per ADR-009: guarantees client-only execution, SSR-safe
-        import("vexflow").then(({ Renderer, Stave, StaveConnector, StaveNote, Formatter }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        import("vexflow").then((vf: any) => {
+          const { Renderer, Stave, StaveConnector, StaveNote, Formatter } = vf;
           // Clear previous VexFlow SVG before re-rendering
           containerEl.innerHTML = "";
 

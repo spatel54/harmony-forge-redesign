@@ -11,6 +11,14 @@ import { subscribeWithSelector } from "zustand/middleware";
  *   staveIndex → which of the 4 SATB staves (0=S, 1=A, 2=T, 3=B)
  *   clef     → clef context for correct stem/beam direction ("treble" | "tenor" | "bass")
  */
+/** Identifies a single note by its position in the score — used for selection state */
+export interface NoteSelection {
+  partId: string;
+  measureIndex: number;
+  noteIndex: number;
+  noteId?: string;
+}
+
 export interface NoteData {
   key: string;
   duration: string;
